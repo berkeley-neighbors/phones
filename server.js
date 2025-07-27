@@ -61,6 +61,21 @@ if (!API_TOKEN) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use((req, res, next) => {
+  if (req.path === "/health") {
+    return next();
+  }
+
+  const token = req.query.token;
+
+  if (!token || token !== API_TOKEN) {
+    console.error(`Invalid or missing API token for ${req.method} ${req.path}`);
+    return res.status(403).json({ error: "Forbidden: Invalid or missing API token" });
+  }
+
+  next();
+});
+
 // Helper function to read phone numbers from file
 const readPhoneNumbers = async () => {
   try {
@@ -90,11 +105,6 @@ const writePhoneNumbers = async phoneNumbers => {
 
 // Twilio webhook endpoint
 app.post("/webhook", async (req, res) => {
-  if (req.query.token !== API_TOKEN) {
-    console.error("Invalid API token");
-    return res.status(403).send("Forbidden: Invalid token");
-  }
-
   try {
     console.log("Received webhook:", req.body);
 
