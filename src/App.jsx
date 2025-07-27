@@ -1,85 +1,68 @@
 import React from "react"
-import { HashRouter, Route, Routes } from "react-router-dom"
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom"
 
+import { AuthProvider } from "./context/AuthContext"
 import { AuthenticationProvider } from "./context/AuthenticationProvider"
 import { ComposerProvider } from "./context/ComposerProvider"
-import { AuthenticationPage } from "./component/AuthenticationPage/AuthenticationPage"
-import { AuthenticationAuthTokenPage } from "./component/AuthenticationAuthTokenPage/AuthenticationAuthTokenPage"
-import { AuthenticationApiKeyPage } from "./component/AuthenticationApiKeyPage/AuthenticationApiKeyPage"
-import { AuthenticatedRoute } from "./component/AuthenticatedRoute/AuthentiatedRoute"
-import { UiPage } from "./component/UiPage/UiPage"
 import { NotFoundPage } from "./component/NotFoundPage/NotFoundPage"
 import { InboxPage } from "./component/InboxPage/InboxPage"
 import { ConversationPage } from "./component/ConversationPage/ConversationPage"
 import { SendPage } from "./component/SendPage/SendPage"
 import { MessagePage } from "./component/MessagePage/MessagePage"
 import { SentPage } from "./component/SentPage/SentPage"
+import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage"
 
 export const App = () => {
   return (
-    <div className="h-full">
+    <AuthProvider>
       <AuthenticationProvider>
         <ComposerProvider>
-          <HashRouter>
-            <Routes>
-              <Route path="/" element={<AuthenticationPage />} />
-              <Route path="/authentication" element={<AuthenticationPage />} />
-              <Route path="/authentication-token" element={<AuthenticationAuthTokenPage />} />
-              <Route path="/authentication-api-key" element={<AuthenticationApiKeyPage />} />
-              <Route
-                path="/inbox"
-                element={
-                  <AuthenticatedRoute>
-                    <InboxPage />
-                  </AuthenticatedRoute>
-                }
-              />
-              <Route
-                path="/message/:messageSid"
-                element={
-                  <AuthenticatedRoute>
-                    <MessagePage />
-                  </AuthenticatedRoute>
-                }
-              />
-              <Route
-                path="/sent/:messageSid"
-                element={
-                  <AuthenticatedRoute>
-                    <SentPage />
-                  </AuthenticatedRoute>
-                }
-              />
-              <Route
-                path="/conversation/:from/:to"
-                element={
-                  <AuthenticatedRoute>
-                    <ConversationPage />
-                  </AuthenticatedRoute>
-                }
-              />
-              <Route
-                path="/send"
-                element={
-                  <AuthenticatedRoute>
+          <Router>
+            <div className="min-h-screen">
+              <Routes>
+                <Route path="/403" element={<ForbiddenErrorPage />} />
+                <Route
+                  path="/"
+                  element={
+                        <InboxPage />
+                  }
+                />
+                <Route
+                  path="/message/:messageSid"
+                  element={
+                      <MessagePage />
+                  }
+                />
+                <Route
+                  path="/sent/:messageSid"
+                  element={
+                        <SentPage />
+                  }
+                />
+                <Route
+                  path="/conversation/:number"
+                  element={
+                        <ConversationPage />
+                  }
+                />
+                <Route
+                  path="/send"
+                  element={
                     <SendPage />
-                  </AuthenticatedRoute>
-                }
-              />
-              <Route
-                path="/send/:from/:to"
-                element={
-                  <AuthenticatedRoute>
-                    <SendPage />
-                  </AuthenticatedRoute>
-                }
-              />
-              <Route path="/ui" element={<UiPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </HashRouter>
+                  }
+                />
+                <Route
+                  path="/send/:number"
+                  element={
+                        <SendPage />
+                  }
+                />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </div>
+          </Router>
         </ComposerProvider>
       </AuthenticationProvider>
-    </div>
+    </AuthProvider>
   )
 }

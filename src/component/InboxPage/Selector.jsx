@@ -1,10 +1,7 @@
 import { selectOptions } from "../../ui/classes"
 import { emptyFn } from "../../js/types"
-import { PhoneCombobox } from "../PhoneCombobox/PhoneComboox"
 
-const isValidOption = (phoneNumber = "", phoneNumbers = []) => phoneNumbers.find(p => p === phoneNumber) !== undefined
-
-export const allPhones = "All phone numbers"
+export const allPhones = "Empty"
 
 export const MessageFilterEnum = {
   all: "All messages",
@@ -26,20 +23,41 @@ const SelectDirection = ({ onMessageFilterChange = emptyFn }) => (
   </select>
 )
 
+const Input = ({
+  loading = true,
+  value = "",
+  disabled = false,
+}) => {
+  if (loading) return <input type="text" className="w-full animate-pulse" value="Loading..." disabled />
+  return (
+    <input
+      type="text"
+      className="w-full"
+      value={value}
+      disabled={disabled}
+    />
+  )
+}
+
 export const Selector = ({
-  phoneNumbers = [],
   phoneNumber = allPhones,
   loading = true,
   onMessageFilterChange = emptyFn,
-  onPhoneNumberChange = emptyFn,
 }) => (
   <div className="flex gap-2 mb-2">
-    <PhoneCombobox
-      initial={allPhones}
-      loading={loading}
-      options={[allPhones, ...phoneNumbers]}
-      onSelect={onPhoneNumberChange}
-    />
-    {isValidOption(phoneNumber, phoneNumbers) && <SelectDirection onMessageFilterChange={onMessageFilterChange} />}
+    {loading ? (
+      <div className="w-full animate-pulse h-10 bg-gray-200" />
+    ) : (
+      <div className={`relative`}>
+      <label className="w-full flex">
+        <Input
+          loading={loading}
+          value={phoneNumber}
+          disabled={true}
+        />
+      </label>
+    </div>
+    )}
+    <SelectDirection onMessageFilterChange={onMessageFilterChange} />
   </div>
 )

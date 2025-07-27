@@ -1,12 +1,10 @@
-# Twilio SMS Web
+# Berkeley Neighbors Phone Support
 
-A minimalist web application to send and read SMS messages via Twilio.
+Web application to send and read SMS messages on behalf of Berkeley Neighbors.
 
-# Hosted Application
+**This project does not ship with any authentication system.**
 
-A version of this application is available on GitHub Pages:
-
-https://rafacandev.github.io/twilio-sms-web
+Originally forked from [twilio-sms-web](https://github.com/rafacandev/twilio-sms-web). License included with this repository.
 
 # Twilio Account
 
@@ -17,11 +15,6 @@ You will need a Twilio account to read and send SMS messages.
 If you don't have an account, Twilio offers a [free trial account][TwilioFreeTrial].
 Once your account is created you will need to [verify your personal phone number][TwilioVerifyPersonalPhoneNumber].
 Finally, you also need to [get a Twilio phone number with SMS capability][TwilioGetPhoneNumber].
-
-## Sign-in to Twilio SMS Web
-
-1. Sign-in to Twilio and get your `ACCOUNT SID` and `AUTH TOKEN` on the [Twilio's Console Page][TwilioConsole].
-2. Use your `ACCOUNT SID` and `AUTH TOKEN` to sign-in to [Twilio SMS Web][HostedDemo].
 
 # Screenshots
 
@@ -81,20 +74,19 @@ Developers can change these values according to their needs via environment vari
 Sample `.env` file:
 
 ```
-# When this value is populated, then Google Tag Manager is going to be enabled with this publicId, i.e: GTM-0000000
-VITE_GOOGLE_TAG_MANAGER_ID=GTM-0000000
+REPLY_MESSAGE
+API_TOKEN
+ALLOWED_HOST
+TWILIO_ALLOWED_PHONE_NUMBER
 
-# Include your authentication info for auto sign-in
-VITE_AUTHENTICATION_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxx
-VITE_AUTHENTICATION_API_KEY=SKxxxxxxxxxxxxxxxxxxxx
-VITE_AUTHENTICATION_API_SECRET=xxxxxxxxxxxxxxxxxxxx
-VITE_TERMS_AND_CONDITIONS_URL=xxxxxxxxxxxxxxxxxxxx
-VITE_GITHUB_URL=xxxxxxxxxxxxxxxxxxxx
+# Include your authentication info
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxx
+TWILIO_API_TOKEN=SKxxxxxxxxxxxxxxxxxxxx
+TWILIO_API_SECRET=xxxxxxxxxxxxxxxxxxxx
 ```
 
 `.env` files should be managed independently and they should not be pushed to the codebase repository.
 
-[HostedDemo]: https://rafacandev.github.io/twilio-sms-web/#/
 [TwilioConsole]: https://www.twilio.com/console?
 [TwilioFreeTrial]: https://www.twilio.com/docs/usage/tutorials/how-to-use-your-free-trial-account
 [TwilioVerifyPersonalPhoneNumber]: https://www.twilio.com/docs/usage/tutorials/how-to-use-your-free-trial-account#verify-your-personal-phone-number

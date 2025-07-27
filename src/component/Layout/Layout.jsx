@@ -1,8 +1,6 @@
-import { GithubOutlined, InboxOutlined, SendOutlined, FileTextFilled } from "@ant-design/icons"
+import { GithubOutlined, InboxOutlined, SendOutlined, FileTextFilled, LogoutOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
-
-const termsAndConditionsUrl = import.meta.env.VITE_TERMS_AND_CONDITIONS_URL
-const githubUrl = import.meta.env.VITE_GITHUB_URL
+import { useAuth } from "../../context/AuthContext"
 
 const NavItem = ({ className, children, onClick = () => {} }) => (
   <span
@@ -17,7 +15,7 @@ const NavBar = () => {
   const navigate = useNavigate()
 
   const navigateToInbox = () => {
-    navigate("/inbox")
+    navigate("/")
   }
 
   const navigateToSend = () => {
@@ -26,7 +24,7 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="flex text-white px-1 sm:px-4">
+      <nav className="flex justify-between text-white px-1 sm:px-4">
         <div className="flex">
           <NavItem onClick={navigateToInbox}>
             <InboxOutlined className="text-lg" />
@@ -37,7 +35,7 @@ const NavBar = () => {
             <span className="mt-1">Send</span>
           </NavItem>
         </div>
-        <div className="grow flex justify-center items-center text-lg">Twilio SMS Web</div>
+        <div className="flex items-center text-lg">1-800-CALL-CLARKE</div>
       </nav>
     </>
   )
@@ -45,18 +43,7 @@ const NavBar = () => {
 
 const Footer = () => (
   <div className="w-full py-2 text-white flex flex-col items-center text-xs gap-1">
-    <a href={githubUrl} className="text-white">
-      <span className="block">
-        <GithubOutlined />
-        <span className="mx-2">GitHub</span>
-      </span>
-    </a>
-    <span className="block">
-      <a href={termsAndConditionsUrl} className="text-white">
-        <FileTextFilled />
-        <span className="mx-2">Terms and Conditions</span>
-      </a>
-    </span>
+    <span>1-800-CALL-CLARKE</span>
   </div>
 )
 
@@ -79,7 +66,7 @@ export const Layout = ({ children }) => (
 export const LayoutWithoutNavBar = ({ children }) => (
   <div className="flex flex-col h-full">
     <div className="flex h-14">
-      <div className="bg-violet-900 grow flex justify-center items-center text-lg text-white">Twilio SMS Web</div>
+      <div className="bg-violet-900 grow flex justify-center items-center text-lg text-white">1-800-CALL-CLARKE</div>
     </div>
     <div className="flex grow">
       <div className="bg-gray-200 grow"></div>

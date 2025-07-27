@@ -19,13 +19,14 @@ const MessagePanel = ({ message }) => {
   const navigate = useNavigate()
   const isReceived = message.direction === "received"
   const isSent = message.direction === "sent"
+  const destination = isReceived ? message.from : message.to
   return (
     <>
       <MessageInfo message={message} />
       <div className="mt-4 text-right space-x-4">
-        <button onClick={() => navigate(`/conversation/${message.from}/${message.to}`)}>See Conversation</button>
-        {isReceived && <button onClick={() => navigate(`/send/${message.to}/${message.from}`)}>Reply</button>}
-        {isSent && <button onClick={() => navigate(`/send/${message.from}/${message.to}`)}>New Message</button>}
+        <button onClick={() => navigate(`/conversation/${destination}`)}>See Conversation</button>
+        {isReceived && <button onClick={() => navigate(`/send/${destination}`)}>Reply</button>}
+        {isSent && <button onClick={() => navigate(`/send/${destination}`)}>New Message</button>}
       </div>
     </>
   )

@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react"
 import { Layout } from "../Layout/Layout"
 import { MessageRows } from "../MessageRows/MessageRows"
-import { allPhones, MessageFilterEnum, Selector } from "./Selector"
+import { MessageFilterEnum, Selector } from "./Selector"
 import { getTwilioPhoneNumbers } from "../../js/getTwilioPhoneNumbers"
 import { getMessages } from "./getMessages"
 import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
 
 export const InboxPage = () => {
   const [messages, setMessages] = useState([])
-  const [phoneNumbers, setPhoneNumbers] = useState([])
-  const [phoneNumber, setPhoneNumber] = useState(allPhones)
+  const [phoneNumber, setPhoneNumber] = useState("")
   const [loadingMessages, setLoadingMessages] = useState(true)
   const [loadingPhones, setLoadingPhones] = useState(true)
   const [messageFilter, setMessageFilter] = useState(MessageFilterEnum.all)
@@ -31,8 +30,11 @@ export const InboxPage = () => {
   }, [phoneNumber, messageFilter])
 
   useEffect(() => {
-    getTwilioPhoneNumbers()
-      .then(setPhoneNumbers)
+    getTwilioPhoneNumbers().then((phoneNumbers => {
+      if (phoneNumbers.length > 0) {
+        setPhoneNumber(phoneNumbers[0])
+      }
+    }))
       .catch(setError)
       .finally(() => setLoadingPhones(false))
   }, [])
@@ -42,8 +44,8 @@ export const InboxPage = () => {
       <h3>Inbox</h3>
       <p className="my-4">Your messages are displayed on this page, with the most recent ones at the top.</p>
       <ErrorLabel error={error} className="mb-4" />
+      
       <Selector
-        phoneNumbers={phoneNumbers}
         phoneNumber={phoneNumber}
         loading={loadingPhones}
         onMessageFilterChange={setMessageFilter}

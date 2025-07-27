@@ -1,9 +1,7 @@
-import axios from "axios"
-import { Authentication, getAuthentication, toCredentials } from "../context/AuthenticationProvider"
-import { isEmpty } from "lodash"
+import axios from "axios";
+import { isEmpty } from "lodash";
 
-export const buildUrl = (accountSid = "", pageSize = 8, pageNumber = 0) =>
-  `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/IncomingPhoneNumbers.json?Beta=false&PageSize=${pageSize}&Page=${pageNumber}`
+export const buildUrl = () => "/api/phone-numbers";
 
 /**
  * Represents a collection of incoming phone numbers and pagination details.
@@ -32,44 +30,19 @@ export const buildUrl = (accountSid = "", pageSize = 8, pageNumber = 0) =>
  * @property {boolean} mms - Indicates if MMS is supported.
  */
 
-/**
- * @param {Authentication} [authentication]
- * @param {Number} [pageSize]
- * @param {Array<string>} [accumulator]
- * @returns {Promise<Array<TwilioPhoneNumberResponse>>}
- */
-const getTwilioPhoneNumbersResursively = async (
-  authentication = new Authentication(),
-  pageSize = 50,
-  accumulator = [],
-) => {
-  const currentPage = await axios.get(buildUrl(authentication.accountSid, pageSize, accumulator.length), {
-    auth: toCredentials(authentication),
-  })
-  const pages = [...accumulator, currentPage]
-
-  const nextPage = currentPage?.data?.next_page_uri
-  const phoneNumbersLength = currentPage?.data?.incoming_phone_numbers?.length ?? 0
-  if (nextPage && phoneNumbersLength > 0) {
-    return getTwilioPhoneNumbersResursively(authentication, pageSize, pages)
-  }
-
-  return pages
-}
-
-let cache = []
+let cache = [];
 /**
  * @returns {Promise<Array<string>>}
  */
 export const getTwilioPhoneNumbers = async () => {
   if (isEmpty(cache)) {
-    const response = await getTwilioPhoneNumbersResursively(getAuthentication())
-    cache = response
-      .flatMap(r => r?.data?.incoming_phone_numbers)
+    const response = await axios.get(buildUrl());
+
+    cache = response?.data?.incoming_phone_numbers
       .filter(pn => pn?.capabilities?.sms)
       .map(pn => pn?.phone_number)
-      .sort()
-    return cache
+      .sort();
+    return cache;
   }
-  return cache
-}
+  return cache;
+};

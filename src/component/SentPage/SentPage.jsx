@@ -19,11 +19,13 @@ import { useNavigate } from "react-router-dom"
  */
 const MessagePanel = ({ message }) => {
   const navigate = useNavigate()
+  const isReceived = message.direction === "received"
+  const destination = isReceived ? message.from : message.to
   return (
     <>
       <MessageInfo message={message} />
       <div className="mt-4 text-right space-x-4">
-        <button onClick={() => navigate(`/conversation/${message.from}/${message.to}`)}>See Conversation</button>
+        <button onClick={() => navigate(`/conversation/${destination}`)}>See Conversation</button>
       </div>
     </>
   )
@@ -40,7 +42,7 @@ export const SentPage = () => {
       .then(setMessage)
       .catch(setError)
       .finally(() => setLoading(false))
-  }, [setMessage])
+  }, [messageSid, setMessage])
 
   return (
     <Layout>

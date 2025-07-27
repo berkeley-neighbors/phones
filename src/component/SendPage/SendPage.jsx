@@ -1,29 +1,25 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { useAuthentication } from "../../context/AuthenticationProvider"
 import { getTwilioPhoneNumbers } from "../../js/getTwilioPhoneNumbers"
 import { sendTwilioMessage } from "../../js/sendTwilioMessage"
 import { phonePattern } from "../../js/util"
 import { Layout } from "../Layout/Layout"
-import { PhoneCombobox } from "../PhoneCombobox/PhoneComboox"
 import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
 import { Loading3QuartersOutlined } from "@ant-design/icons"
 
 export const SendPage = () => {
-  const { from: fromParam, to: toParam } = useParams()
-  const [phoneNumbers, setPhoneNumbers] = useState([])
-  const [from, setFrom] = useState(fromParam ?? "")
+  const { number: toParam } = useParams()
+  const [from, setFrom] = useState("")
   const [to, setTo] = useState(toParam ?? "")
   const [message, setMessage] = useState("")
   const [loadingPhoneNumbers, setLoadingPhoneNumbers] = useState(true)
   const [sendingMessage, setSendingMessage] = useState(false)
   const [error, setError] = useState(null)
-  const [authentication] = useAuthentication()
   const navigate = useNavigate()
 
   useEffect(() => {
     getTwilioPhoneNumbers()
-      .then(setPhoneNumbers)
+      .then((phonesNumbers) => setFrom(phonesNumbers[0]))
       .catch(setError)
       .finally(() => setLoadingPhoneNumbers(false))
   }, [])
@@ -37,17 +33,32 @@ export const SendPage = () => {
     if (sendingMessage) return
 
     setSendingMessage(true)
-    sendTwilioMessage(authentication, to, from, message)
+    sendTwilioMessage(to, message)
       .catch(setError)
       .then(messageSid => navigate(`/sent/${messageSid}`))
       .finally(() => setSendingMessage(false))
   }
 
+  const Input = ({
+  loading = true,
+  value = "",
+  disabled = false,
+}) => {
+  if (loading) return <input type="text" className="w-full animate-pulse" value="Loading..." disabled />
+  return (
+    <input
+      type="text"
+      className="w-full"
+      value={value}
+      disabled={disabled}
+    />
+  )
+}
+
   const isValid = () => {
-    const isValidFrom = phoneNumbers.includes(from)
     const isValidTo = to.match(phonePattern) !== null
     const isValidMessage = message.length > 0 && message.length < 500
-    return !sendingMessage && isValidFrom && isValidTo && isValidMessage
+    return !sendingMessage && isValidTo && isValidMessage
   }
 
   const hint = `Send a message from  ${from === "" ? "?" : from}  to  ${to === "" ? "?" : to}`
@@ -55,17 +66,24 @@ export const SendPage = () => {
   return (
     <Layout>
       <h3>Send</h3>
-      <p className="my-4">Select phone number to send a message from.</p>
       <ErrorLabel error={error} className="mb-4" />
       <div className="flex items-center">
         <label className="w-14">From:</label>
-        <PhoneCombobox
-          initial={from}
-          options={phoneNumbers}
-          onSelect={setFrom}
-          loading={loadingPhoneNumbers}
-          disabled={sendingMessage}
-        />
+    <div className="flex gap-2 mb-2">
+      {loadingPhoneNumbers ? (
+        <div className="w-full animate-pulse h-10 bg-gray-200" />
+      ) : (
+        <div className={`relative`}>
+        <label className="w-full flex">
+          <Input
+            loading={loadingPhoneNumbers}
+            value={from}
+            disabled={true}
+          />
+        </label>
+      </div>
+      )}
+    </div>
       </div>
       <div className="flex items-center mt-2">
         <label className="w-14">To:</label>

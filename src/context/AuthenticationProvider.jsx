@@ -67,11 +67,12 @@ export const mapAuthenticationError = err => {
 
 const fromEnvironmentVariables = () => {
   const accountSid = import.meta.env.VITE_AUTHENTICATION_ACCOUNT_SID
+  const authToken = import.meta.env.VITE_AUTHENTICATION_AUTH_TOKEN
   const apiKey = import.meta.env.VITE_AUTHENTICATION_API_KEY
   const apiSecret = import.meta.env.VITE_AUTHENTICATION_API_SECRET
   if (accountSid !== undefined && apiKey !== undefined && apiSecret !== undefined) {
     console.log(`Setting authentication from environment variables for accountSid: ${accountSid}`)
-    return new Authentication(accountSid, undefined, apiKey, apiSecret, AuthenticationMethod.API_KEY)
+    return new Authentication(accountSid, authToken, apiKey, apiSecret, AuthenticationMethod.API_KEY)
   }
   return new Authentication()
 }

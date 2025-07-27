@@ -5,24 +5,23 @@ import { getTwilioMessages, sortByDate } from "../../js/getTwilioMessages"
 import { MessageRows } from "../MessageRows/MessageRows"
 
 export const ConversationPage = () => {
-  const { from, to } = useParams()
+  const { number } = useParams()
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const ft = getTwilioMessages(from, to)
-    const tf = getTwilioMessages(to, from)
+    const ft = getTwilioMessages({to: number})
+    const tf = getTwilioMessages({from: number})
     Promise.all([ft, tf])
       .then(msg => setMessages(msg.flat().sort(sortByDate)))
       .then(() => setLoading(false))
-  }, [from, to])
+  }, [number])
 
   return (
     <Layout>
       <h3>Conversation</h3>
       <p className="my-4">
-        Messages exchanged between <span className="font-semibold">{from}</span> and{" "}
-        <span className="font-semibold">{to}</span>
+        Messages exchanged with <span className="font-semibold">{number}</span> 
       </p>
       <MessageRows messages={messages} loading={loading} />
     </Layout>

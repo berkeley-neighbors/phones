@@ -1,6 +1,5 @@
-import axios from "axios"
-import { getAuthentication, toCredentials } from "../context/AuthenticationProvider"
-import { MessageDirection } from "./types"
+import axios from "axios";
+import { MessageDirection } from "./types";
 
 /**
  * @typedef {import('./types').Message} Message
@@ -15,65 +14,43 @@ const toMessage = (v = {}) => ({
   status: v.status,
   body: v.body,
   media: parseInt(v.num_media),
-})
+});
 
-export const sortByDate = (a, b) => (Date.parse(a.date) > Date.parse(b.date) ? -1 : 1)
-
-/**
- * @param {string} phoneNumber
- * @returns {Array<Message>}
- */
-export const getTwilioMessagesByPhoneNumber = async phoneNumber => {
-  const authentication = getAuthentication()
-  const credentials = toCredentials(authentication)
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${authentication.accountSid}/Messages.json`
-  const fromResult = await axios.get(url, {
-    auth: credentials,
-    params: { From: phoneNumber },
-  })
-  const toResult = await axios.get(url, {
-    auth: credentials,
-    params: { To: phoneNumber },
-  })
-  return [].concat(fromResult.data.messages).concat(toResult.data.messages).map(toMessage).sort(sortByDate)
-}
+export const sortByDate = (a, b) => (Date.parse(a.date) > Date.parse(b.date) ? -1 : 1);
 
 /**
  * @returns {Promise<Array<Message>>}
  */
-export const getTwilioMessages = async (from = "", to = "") => {
-  const authentication = getAuthentication()
-  const credentials = toCredentials(authentication)
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${authentication.accountSid}/Messages.json`
+export const getTwilioMessages = async ({ from = "", to = "", filter }) => {
+  const url = `/api/messages`;
 
-  const params = {}
+  const params = {};
   if (to.length > 0) {
-    params.To = to
+    params.to = to;
   }
 
   if (from.length > 0) {
-    params.From = from
+    params.from = from;
+  }
+
+  if (filter) {
+    params.filter = filter;
   }
 
   const response = await axios.get(url, {
-    auth: credentials,
     params,
-  })
+  });
 
-  return response.data.messages.map(toMessage).sort(sortByDate)
-}
+  return response.data.messages.map(toMessage).sort(sortByDate);
+};
 
 /**
  * @returns {Promise<Message>}
  */
 export const getTwilioMessage = async (messageSid = "") => {
-  const authentication = getAuthentication()
-  const credentials = toCredentials(authentication)
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${authentication.accountSid}/Messages/${messageSid}.json`
+  const url = `/api/messages/${messageSid}`;
 
-  const response = await axios.get(url, {
-    auth: credentials,
-  })
+  const response = await axios.get(url);
 
-  return toMessage(response.data)
-}
+  return toMessage(response.data);
+};
