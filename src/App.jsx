@@ -11,6 +11,7 @@ import { SendPage } from "./component/SendPage/SendPage"
 import { MessagePage } from "./component/MessagePage/MessagePage"
 import { SentPage } from "./component/SentPage/SentPage"
 import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage"
+import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage"
 
 export const App = () => {
   return (
@@ -21,10 +22,11 @@ export const App = () => {
             <div className="min-h-screen">
               <Routes>
                 <Route path="/403" element={<ForbiddenErrorPage />} />
+                <Route path="/auth-callback" element={<AuthCallbackPage />} />
                 <Route
                   path="/"
                   element={
-                        <InboxPage />
+                    <InboxPage />
                   }
                 />
                 <Route

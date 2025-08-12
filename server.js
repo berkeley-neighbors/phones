@@ -4,6 +4,8 @@ import path from "path";
 import { Buffer } from "buffer";
 import { config } from "dotenv";
 import process from "process";
+import cookieParser from "cookie-parser";
+
 const app = express();
 
 function getEnvironmentVariable(name, defaultValue) {
@@ -26,6 +28,9 @@ function getEnvironmentVariable(name, defaultValue) {
 }
 
 const PORT = 4000;
+const TOKEN_EXCHANGE_ACTION = "exchange";
+const TOKEN_EXCHANGE_PATH = "/webman/sso/SSOAccessToken.cgi";
+
 const PHONE_NUMBERS_FILE = getEnvironmentVariable("PHONE_NUMBERS_FILE", "./phone-numbers.json");
 const REPLY_MESSAGE = getEnvironmentVariable("REPLY_MESSAGE", "Welcome! You have been registered for updates.");
 const API_TOKEN = getEnvironmentVariable("API_TOKEN");
@@ -33,6 +38,9 @@ const TWILIO_ALLOWED_PHONE_NUMBER = getEnvironmentVariable("TWILIO_ALLOWED_PHONE
 const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
 const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
 const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
+const SYNOLOGY_SSO_URL = getEnvironmentVariable("SYNOLOGY_SSO_URL");
+const SYNOLOGY_SSO_APP_ID = getEnvironmentVariable("SYNOLOGY_SSO_APP_ID");
+const COOKIE_SECRET = getEnvironmentVariable("COOKIE_SECRET");
 
 const getMessagesUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
 
@@ -60,12 +68,9 @@ if (!API_TOKEN) {
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser(COOKIE_SECRET));
 
-app.use((req, res, next) => {
-  if (req.path === "/health") {
-    return next();
-  }
-
+function validateAPIToken(req, res, next) {
   const token = req.query.token;
 
   if (!token || token !== API_TOKEN) {
@@ -74,7 +79,51 @@ app.use((req, res, next) => {
   }
 
   next();
-});
+}
+
+async function validateLogin(req, res, next) {
+  const accessToken = req.signedCookies && req.signedCookies.accessToken;
+
+  if (!accessToken) {
+    console.error("No accessToken cookie found");
+    return res.status(401).json({ error: "Unauthorized: No accessToken cookie found" });
+  }
+
+  const tokenExchangeURL = new URL(TOKEN_EXCHANGE_PATH, SYNOLOGY_SSO_URL);
+  tokenExchangeURL.searchParams.append("action", TOKEN_EXCHANGE_ACTION);
+  tokenExchangeURL.searchParams.append("app_id", SYNOLOGY_SSO_APP_ID);
+  tokenExchangeURL.searchParams.append("access_token", accessToken);
+
+  const response = await fetch(tokenExchangeURL.toString(), {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error(`Failed to validate access token: ${response.statusText}`);
+    return res.status(500).send("Internal Server Error");
+  }
+
+  try {
+    const data = await response.json();
+
+    if (!data) {
+      console.error("No data returned from token exchange");
+      return res.status(401).send("Unauthorized: Invalid access token");
+    }
+
+    if (!data.success) {
+      console.error("Token exchange failed:", data.error);
+      return res.status(401).send("Unauthorized: Invalid access token");
+    }
+  } catch (error) {
+    console.error("Error parsing token exchange response:", error);
+    return res.status(500).send("Internal Server Error");
+  }
+
+  next();
+}
 
 // Helper function to read phone numbers from file
 const readPhoneNumbers = async () => {
@@ -104,7 +153,7 @@ const writePhoneNumbers = async phoneNumbers => {
 };
 
 // Twilio webhook endpoint
-app.post("/webhook", async (req, res) => {
+app.post("/webhook", validateAPIToken, async (req, res) => {
   try {
     console.log("Received webhook:", req.body);
 
@@ -171,7 +220,7 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-app.get("/messages", async (req, res) => {
+app.get("/messages", validateLogin, async (req, res) => {
   const { from, to, filter } = req.query;
 
   console.log("Fetching messages with params:", { from, to, filter });
@@ -266,7 +315,7 @@ app.get("/messages", async (req, res) => {
   }
 });
 
-app.post("/messages", async (req, res) => {
+app.post("/messages", validateLogin, async (req, res) => {
   const { to, body } = req.body;
   if (!to || !body) {
     return res.status(400).send("Bad Request: Missing To or Body");
@@ -304,7 +353,7 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-app.get("/messages/:messageSid", async (req, res) => {
+app.get("/messages/:messageSid", validateLogin, async (req, res) => {
   const messageSid = req.params.messageSid;
   if (!messageSid) {
     return res.status(400).send("Bad Request: Missing message SID");
@@ -325,7 +374,7 @@ app.get("/messages/:messageSid", async (req, res) => {
   }
 });
 
-app.get("/messages/:messageSid/media", async (req, res) => {
+app.get("/messages/:messageSid/media", validateLogin, async (req, res) => {
   const messageSid = req.params.messageSid;
   if (!messageSid) {
     return res.status(400).send("Bad Request: Missing message SID");
@@ -346,7 +395,7 @@ app.get("/messages/:messageSid/media", async (req, res) => {
   }
 });
 
-app.get("/phone-numbers", async (req, res) => {
+app.get("/phone-numbers", validateLogin, async (req, res) => {
   try {
     const response = await fetch(getPhoneNumbersUrl(), {
       headers: {
@@ -380,4 +429,22 @@ app.get("/phone-numbers", async (req, res) => {
     console.error("Error fetching phone numbers:", error);
     res.status(500).send("Internal Server Error");
   }
+});
+
+app.post("/register", async (req, res) => {
+  const { accessToken } = req.body;
+
+  if (!accessToken) {
+    return res.status(400).send("Bad Request: Missing accessToken parameter");
+  }
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    signed: true,
+    maxAge: 60 * 60 * 1000 * 24 * 7, // 1 week
+  });
+
+  console.info("Access token registered successfully");
+  res.status(200).send("OK");
 });
