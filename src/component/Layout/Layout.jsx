@@ -35,7 +35,7 @@ const NavBar = () => {
             <span className="mt-1">Send</span>
           </NavItem>
         </div>
-        <div className="flex items-center text-lg">1-800-CALL-CLARKE</div>
+        <div className="flex items-center text-lg">Berkeley Neighbors Phone System</div>
       </nav>
     </>
   )
@@ -43,7 +43,7 @@ const NavBar = () => {
 
 const Footer = () => (
   <div className="w-full py-2 text-white flex flex-col items-center text-xs gap-1">
-    <span>1-800-CALL-CLARKE</span>
+    <span>Berkeley Neighbors Phone System</span>
   </div>
 )
 
@@ -66,7 +66,7 @@ export const Layout = ({ children }) => (
 export const LayoutWithoutNavBar = ({ children }) => (
   <div className="flex flex-col h-full">
     <div className="flex h-14">
-      <div className="bg-violet-900 grow flex justify-center items-center text-lg text-white">1-800-CALL-CLARKE</div>
+      <div className="bg-violet-900 grow flex justify-center items-center text-lg text-white">Berkeley Neighbors Phone System</div>
     </div>
     <div className="flex grow">
       <div className="bg-gray-200 grow"></div>

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { MessageDirection } from "./types";
-import { UnauthorizedError } from "./errors";
 
 /**
  * @typedef {import('./types').Message} Message
@@ -41,10 +40,6 @@ export const getTwilioMessages = async ({ from = "", to = "", filter }) => {
   const response = await axios.get(url, {
     params,
   });
-
-  if (response.status === 401) {
-    throw new UnauthorizedError("Unauthorized");
-  }
 
   return response.data.messages.map(toMessage).sort(sortByDate);
 };
