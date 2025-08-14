@@ -353,27 +353,6 @@ app.post("/messages", validateLogin, async (req, res) => {
   }
 });
 
-app.get("/messages/:messageSid", validateLogin, async (req, res) => {
-  const messageSid = req.params.messageSid;
-  if (!messageSid) {
-    return res.status(400).send("Bad Request: Missing message SID");
-  }
-
-  try {
-    const url = getMessageBySidUrl(messageSid);
-    const response = await fetch(url, {
-      headers: {
-        Authorization: getAuthorizationHeader(),
-      },
-    });
-
-    res.status(200).json(await response.json());
-  } catch (error) {
-    console.error("Error fetching message:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
 app.get("/messages/:messageSid/media", validateLogin, async (req, res) => {
   const messageSid = req.params.messageSid;
   if (!messageSid) {
@@ -388,9 +367,31 @@ app.get("/messages/:messageSid/media", validateLogin, async (req, res) => {
       },
     });
 
-    res.status(200).json(response.data);
+    res.status(200).json(await response.json());
   } catch (error) {
     console.error("Error fetching media:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get("/messages/:messageSid", validateLogin, async (req, res) => {
+  const messageSid = req.params.messageSid;
+  if (!messageSid) {
+    return res.status(400).send("Bad Request: Missing message SID");
+  }
+
+  try {
+    const url = getMessageBySidUrl(messageSid);
+    console.log("Fetching message by SID:", url);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: getAuthorizationHeader(),
+      },
+    });
+
+    res.status(200).json(await response.json());
+  } catch (error) {
+    console.error("Error fetching message:", error);
     res.status(500).send("Internal Server Error");
   }
 });

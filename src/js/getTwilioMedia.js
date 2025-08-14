@@ -14,8 +14,9 @@ export const getTwilioMedia = async messageSid => {
   let result = [];
   const url = `/api/messages/${messageSid}/media`;
   const response = await axios.get(url);
-  if (response?.data?.media_list?.length > 0) {
-    result = response.data.media_list.map(m => {
+
+  if (response?.data?.media?.media_list?.length > 0) {
+    result = response.data.media.media_list.map(m => {
       const suffix = m.uri.substring(0, m.uri.indexOf(".json"));
       return `https://api.twilio.com/${suffix}`;
     });
