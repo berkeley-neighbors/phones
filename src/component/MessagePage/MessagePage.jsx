@@ -5,6 +5,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import { MessageInfo } from "../MessageInfo/MessageInfo"
 import { LoadingOutlined } from "@ant-design/icons"
 import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
+import { APIContext } from "@/context/APIContext";
+import { useContext } from "react";
 
 /**
  * @typedef {import("../../js/types").Message} Message
@@ -38,8 +40,10 @@ export const MessagePage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const api = useContext(APIContext);
+  
   useEffect(() => {
-    getTwilioMessage(messageSid)
+    getTwilioMessage(api, messageSid)
       .then(setMessage)
       .catch(setError)
       .finally(() => setLoading(false))

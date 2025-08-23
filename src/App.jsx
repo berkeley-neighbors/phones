@@ -1,9 +1,8 @@
 import React from "react"
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom"
 
-import { AuthProvider } from "./context/AuthContext"
-import { AuthenticationProvider } from "./context/AuthenticationProvider"
-import { ComposerProvider } from "./context/ComposerProvider"
+import { APIContext } from "@/context/APIContext";
+import { ComposerProvider } from "@/context/ComposerProvider"
 import { NotFoundPage } from "./component/NotFoundPage/NotFoundPage"
 import { InboxPage } from "./component/InboxPage/InboxPage"
 import { ConversationPage } from "./component/ConversationPage/ConversationPage"
@@ -12,11 +11,32 @@ import { MessagePage } from "./component/MessagePage/MessagePage"
 import { SentPage } from "./component/SentPage/SentPage"
 import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage"
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage"
+import axios from "axios";
+
+const instance = axios.create();
+
+const APPLICATION_ID = import.meta.env.VITE_SYNOLOGY_SSO_APP_ID;
+const SSO_URL = import.meta.env.VITE_SYNOLOGY_SSO_URL;
+
+instance.interceptors.response.use(null, function (error) {
+    const redirectURI = new URL('/auth-callback', window.location.origin).toString();
+    
+    if (error.status === 401) {
+      const ssoLoginURL = new URL('/webman/sso/SSOOauth.cgi', SSO_URL);
+      ssoLoginURL.searchParams.append("app_id", APPLICATION_ID);
+      ssoLoginURL.searchParams.append("scope", "user_id");
+      ssoLoginURL.searchParams.append("synossoJSSDK", "false");
+      ssoLoginURL.searchParams.append("redirect_uri", redirectURI);
+
+      window.location.href = ssoLoginURL.toString();
+    }
+    
+    return Promise.reject(error);
+  });
 
 export const App = () => {
   return (
-    <AuthProvider>
-      <AuthenticationProvider>
+    <APIContext value={instance}>
         <ComposerProvider>
           <Router>
             <div className="min-h-screen">
@@ -64,7 +84,6 @@ export const App = () => {
             </div>
           </Router>
         </ComposerProvider>
-      </AuthenticationProvider>
-    </AuthProvider>
+      </APIContext>
   )
 }

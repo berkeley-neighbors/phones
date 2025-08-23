@@ -1,4 +1,3 @@
-import axios from "axios";
 import { isEmpty } from "lodash";
 
 export const buildUrl = () => "/api/phone-numbers";
@@ -34,9 +33,9 @@ let cache = [];
 /**
  * @returns {Promise<Array<string>>}
  */
-export const getTwilioPhoneNumbers = async () => {
+export const getTwilioPhoneNumbers = async api => {
   if (isEmpty(cache)) {
-    const response = await axios.get(buildUrl());
+    const response = await api.get(buildUrl());
 
     cache = response?.data?.incoming_phone_numbers
       .filter(pn => pn?.capabilities?.sms)

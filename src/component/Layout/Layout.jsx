@@ -1,6 +1,5 @@
 import { GithubOutlined, InboxOutlined, SendOutlined, FileTextFilled, LogoutOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
 
 const NavItem = ({ className, children, onClick = () => {} }) => (
   <span

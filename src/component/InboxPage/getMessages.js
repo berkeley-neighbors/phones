@@ -9,30 +9,30 @@ import { allPhones, MessageFilterEnum } from "./Selector";
  *
  * @returns {Promise<Array<Message>>}
  */
-export const getMessages = async (phoneNumber = allPhones, filter = MessageFilterEnum.all) => {
+export const getMessages = async (api, phoneNumber = allPhones, filter = MessageFilterEnum.all) => {
   if (MessageFilterEnum.all === filter) {
-    return await getTwilioMessages({
+    return await getTwilioMessages(api, {
       filter: "all",
     });
   }
 
   if (MessageFilterEnum.received === filter) {
-    return await getTwilioMessages({
+    return await getTwilioMessages(api, {
       filter: "received",
     });
   }
 
   if (MessageFilterEnum.sent === filter) {
-    return await getTwilioMessages({
+    return await getTwilioMessages(api, {
       filter: "sent",
     });
   }
 
-  const from = await getTwilioMessages({
+  const from = await getTwilioMessages(api, {
     from: phoneNumber,
   });
 
-  const to = await getTwilioMessages({
+  const to = await getTwilioMessages(api, {
     to: phoneNumber,
   });
 

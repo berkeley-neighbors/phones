@@ -1,8 +1,6 @@
-import axios from "axios";
-
-export const sendTwilioMessage = async (to = "", body = "") => {
+export const sendTwilioMessage = async (api, to = "", body = "") => {
   const url = `/api/messages`;
-  const response = await axios.post(
+  const response = await api.post(
     url,
     {
       to,

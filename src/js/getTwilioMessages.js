@@ -1,4 +1,3 @@
-import axios from "axios";
 import { MessageDirection } from "./types";
 
 /**
@@ -21,7 +20,7 @@ export const sortByDate = (a, b) => (Date.parse(a.date) > Date.parse(b.date) ? -
 /**
  * @returns {Promise<Array<Message>>}
  */
-export const getTwilioMessages = async ({ from = "", to = "", filter }) => {
+export const getTwilioMessages = async (api, { from = "", to = "", filter }) => {
   const url = `/api/messages`;
 
   const params = {};
@@ -37,7 +36,7 @@ export const getTwilioMessages = async ({ from = "", to = "", filter }) => {
     params.filter = filter;
   }
 
-  const response = await axios.get(url, {
+  const response = await api.get(url, {
     params,
   });
 
@@ -47,10 +46,10 @@ export const getTwilioMessages = async ({ from = "", to = "", filter }) => {
 /**
  * @returns {Promise<Message>}
  */
-export const getTwilioMessage = async (messageSid = "") => {
+export const getTwilioMessage = async (api, messageSid = "") => {
   const url = `/api/messages/${messageSid}`;
 
-  const response = await axios.get(url);
+  const response = await api.get(url);
 
   return toMessage(response.data);
 };

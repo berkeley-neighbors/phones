@@ -5,11 +5,11 @@ import { MessageFilterEnum, Selector } from "./Selector"
 import { getTwilioPhoneNumbers } from "../../js/getTwilioPhoneNumbers"
 import { getMessages } from "./getMessages"
 import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
-
-const APPLICATION_ID = import.meta.env.VITE_SYNOLOGY_SSO_APP_ID;
-const SSO_URL = import.meta.env.VITE_SYNOLOGY_SSO_URL;
+import { APIContext } from "@/context/APIContext";
+import { useContext } from "react";
 
 export const InboxPage = () => {
+  const api = useContext(APIContext);
   const [messages, setMessages] = useState([])
   const [phoneNumber, setPhoneNumber] = useState("")
   const [loadingMessages, setLoadingMessages] = useState(true)
@@ -17,28 +17,12 @@ export const InboxPage = () => {
   const [messageFilter, setMessageFilter] = useState(MessageFilterEnum.all)
   const [error, setError] = useState(null)
 
-  const redirectURI = new URL('/auth-callback', window.location.origin).toString();
-
   useEffect(() => {
     const run = async () => {
       setLoadingMessages(true)
       try {
-        const ms = await getMessages(phoneNumber, messageFilter)
+        const ms = await getMessages(api, phoneNumber, messageFilter)
         setMessages(ms)
-      } catch (e) {
-        if (e.status === 401) {
-          const ssoLoginURL = new URL('/webman/sso/SSOOauth.cgi', SSO_URL);
-          ssoLoginURL.searchParams.append("app_id", APPLICATION_ID);
-          ssoLoginURL.searchParams.append("scope", "user_id");
-          ssoLoginURL.searchParams.append("synossoJSSDK", "false");
-          ssoLoginURL.searchParams.append("redirect_uri", redirectURI);
-
-          window.location.href = ssoLoginURL.toString();
-          
-          return;
-        }
-        
-        setError(e)
       } finally {
         setLoadingMessages(false)
       }
@@ -47,7 +31,7 @@ export const InboxPage = () => {
   }, [phoneNumber, messageFilter])
 
   useEffect(() => {
-    getTwilioPhoneNumbers().then((phoneNumbers => {
+    getTwilioPhoneNumbers(api).then((phoneNumbers => {
       if (phoneNumbers.length > 0) {
         setPhoneNumber(phoneNumbers[0])
       }

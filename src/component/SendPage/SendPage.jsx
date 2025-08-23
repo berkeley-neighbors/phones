@@ -7,6 +7,9 @@ import { Layout } from "../Layout/Layout"
 import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
 import { Loading3QuartersOutlined } from "@ant-design/icons"
 
+import { useContext} from "react";
+import { APIContext } from "@/context/APIContext";
+
 export const SendPage = () => {
   const { number: toParam } = useParams()
   const [from, setFrom] = useState("")
@@ -16,9 +19,10 @@ export const SendPage = () => {
   const [sendingMessage, setSendingMessage] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
+  const api = useContext(APIContext);
 
   useEffect(() => {
-    getTwilioPhoneNumbers()
+    getTwilioPhoneNumbers(api)
       .then((phonesNumbers) => setFrom(phonesNumbers[0]))
       .catch(setError)
       .finally(() => setLoadingPhoneNumbers(false))
@@ -33,7 +37,7 @@ export const SendPage = () => {
     if (sendingMessage) return
 
     setSendingMessage(true)
-    sendTwilioMessage(to, message)
+    sendTwilioMessage(api, to, message)
       .catch(setError)
       .then(messageSid => navigate(`/sent/${messageSid}`))
       .finally(() => setSendingMessage(false))
