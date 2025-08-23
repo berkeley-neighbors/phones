@@ -1,18 +1,17 @@
 {
-  "name": "my-vite-app",
+  "name": "phones",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://rafasantos.github.io/twilio-sms-web/",
+  "homepage": "https://github.com/berkeley-neighbors/phones",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"NODE_ENV=development vite\" \"node server.js\"",
+    "start": "concurrently \"NODE_ENV=production vite\" \"NODE_ENV=production node server.js\"",
     "build": "vite build",
     "build:prod": "cp .env-prod .env && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "vite build",
-    "deploy": "gh-pages -d dist",
-    "start": "concurrently \"vite\" \"node server.js\"",
     "format": "prettier . --write"
   },
   "dependencies": {
