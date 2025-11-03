@@ -34,7 +34,8 @@ const TOKEN_EXCHANGE_PATH = "/webman/sso/SSOAccessToken.cgi";
 const PHONE_NUMBERS_FILE = getEnvironmentVariable("PHONE_NUMBERS_FILE", "./phone-numbers.json");
 const REPLY_MESSAGE = getEnvironmentVariable("REPLY_MESSAGE", "Welcome! You have been registered for updates.");
 const API_TOKEN = getEnvironmentVariable("API_TOKEN");
-const TWILIO_ALLOWED_PHONE_NUMBER = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER");
+const TWILIO_ALLOWED_PHONE_NUMBER_INBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_INBOUND");
+const TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND");
 const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
 const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
 const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
@@ -231,7 +232,7 @@ app.get("/messages", validateLogin, async (req, res) => {
         requests.push(
           fetch(
             `${getMessagesUrl()}?${new URLSearchParams({
-              To: TWILIO_ALLOWED_PHONE_NUMBER,
+              To: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
             }).toString()}`,
             {
               headers: {
@@ -247,7 +248,7 @@ app.get("/messages", validateLogin, async (req, res) => {
         requests.push(
           fetch(
             `${getMessagesUrl()}?${new URLSearchParams({
-              From: TWILIO_ALLOWED_PHONE_NUMBER,
+              From: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
             }).toString()}`,
             {
               headers: {
@@ -264,7 +265,7 @@ app.get("/messages", validateLogin, async (req, res) => {
           fetch(
             `${getMessagesUrl()}?${new URLSearchParams({
               From: from,
-              To: TWILIO_ALLOWED_PHONE_NUMBER,
+              To: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
             }).toString()}`,
             {
               headers: {
@@ -281,7 +282,7 @@ app.get("/messages", validateLogin, async (req, res) => {
           fetch(
             `${getMessagesUrl()}?${new URLSearchParams({
               To: to,
-              From: TWILIO_ALLOWED_PHONE_NUMBER,
+              From: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
             }).toString()}`,
             {
               headers: {
@@ -326,7 +327,7 @@ app.post("/messages", validateLogin, async (req, res) => {
     const response = await fetch(
       `${getMessagesUrl()}?${new URLSearchParams({
         To: to,
-        From: TWILIO_ALLOWED_PHONE_NUMBER,
+        From: TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND,
         Body: body,
       })}`,
       {
@@ -421,7 +422,7 @@ app.get("/phone-numbers", validateLogin, async (req, res) => {
 
     if (data.incoming_phone_numbers) {
       filteredPhoneNumbers = data.incoming_phone_numbers.filter(details => {
-        return details.phone_number === TWILIO_ALLOWED_PHONE_NUMBER;
+        return details.phone_number === TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND;
       });
     }
 
