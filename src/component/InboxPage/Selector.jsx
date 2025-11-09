@@ -11,14 +11,14 @@ export const MessageFilterEnum = {
 
 const SelectDirection = ({ onMessageFilterChange = emptyFn }) => (
   <select onChange={e => onMessageFilterChange(e.target.value)}>
-    <option className={selectOptions} value={MessageFilterEnum.all}>
-      {MessageFilterEnum.all}
-    </option>
     <option className={selectOptions} value={MessageFilterEnum.received}>
       {MessageFilterEnum.received}
     </option>
     <option className={selectOptions} value={MessageFilterEnum.sent}>
       {MessageFilterEnum.sent}
+    </option>
+    <option className={selectOptions} value={MessageFilterEnum.all}>
+      {MessageFilterEnum.all}
     </option>
   </select>
 )

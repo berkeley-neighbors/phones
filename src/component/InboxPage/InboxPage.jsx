@@ -14,7 +14,7 @@ export const InboxPage = () => {
   const [phoneNumber, setPhoneNumber] = useState("")
   const [loadingMessages, setLoadingMessages] = useState(true)
   const [loadingPhones, setLoadingPhones] = useState(true)
-  const [messageFilter, setMessageFilter] = useState(MessageFilterEnum.all)
+  const [messageFilter, setMessageFilter] = useState(MessageFilterEnum.received)
   const [error, setError] = useState(null)
 
   useEffect(() => {
