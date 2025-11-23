@@ -20,6 +20,7 @@ const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
 const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
 const SYNOLOGY_SSO_URL = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_SSO_APP_ID = getEnvironmentVariable("SYNOLOGY_SSO_APP_ID");
+const SYNOLOGY_GROUP_NAME = getEnvironmentVariable("SYNOLOGY_GROUP_NAME", "");
 
 async function connectMongoDB() {
   try {
@@ -68,6 +69,7 @@ async function startServer() {
       exchangeAction: TOKEN_EXCHANGE_ACTION,
       ssoUrl: SYNOLOGY_SSO_URL,
       ssoAppId: SYNOLOGY_SSO_APP_ID,
+      groupName: SYNOLOGY_GROUP_NAME,
       inboundNumber: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
       outboundNumber: TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND,
     };

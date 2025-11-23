@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
 import { APIContext, APIInstance } from "@/context/APIContext";
@@ -15,6 +15,10 @@ import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErro
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage";
 
 export const App = () => {
+  useEffect(() => {
+    const token = fetch("/api/session-token");
+  }, []);
+
   return (
     <APIContext value={APIInstance}>
       <SnackbarProvider>

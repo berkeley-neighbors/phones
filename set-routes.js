@@ -6,7 +6,7 @@ export function setRoutes(
   app,
   { mongoClient, options: { databaseName, staffCollectionName, threadCollectionName } },
   { accountSID, token, secret },
-  { exchangePath, exchangeAction, ssoUrl, ssoAppId, inboundNumber, outboundNumber },
+  { exchangePath, exchangeAction, ssoUrl, ssoAppId, groupName, inboundNumber, outboundNumber },
 ) {
   const db = mongoClient.db(databaseName);
   const staffCollection = db.collection(staffCollectionName);
@@ -43,19 +43,19 @@ export function setRoutes(
     tokenExchangeURL.searchParams.append("app_id", ssoAppId);
     tokenExchangeURL.searchParams.append("access_token", accessToken);
 
-    const response = await fetch(tokenExchangeURL.toString(), {
+    const parsed = await fetch(tokenExchangeURL.toString(), {
       headers: {
         Accept: "application/json",
       },
     });
 
-    if (!response.ok) {
-      console.error(`Failed to validate access token: ${response.statusText}`);
+    if (!parsed.ok) {
+      console.error(`Failed to validate access token: ${parsed.statusText}`);
       return res.status(500).send("Internal Server Error");
     }
 
     try {
-      const data = await response.json();
+      const data = await parsed.json();
 
       if (!data) {
         console.error("No data returned from token exchange");
@@ -372,6 +372,101 @@ export function setRoutes(
     } catch (error) {
       console.error("Error removing staff:", error);
       res.status(500).json({ error: "Failed to remove staff" });
+    }
+  });
+
+  app.get("/synology/group-members", validateLogin, async (req, res) => {
+    try {
+      if (!groupName) {
+        return res.status(400).json({ error: "SYNOLOGY_GROUP_NAME not configured" });
+      }
+
+      const accessToken = req.signedCookies && req.signedCookies.accessToken;
+
+      if (!accessToken) {
+        return res.status(401).json({ error: "Unauthorized: No access token" });
+      }
+
+      // Call Synology API to get group members
+      const apiUrl = new URL("/webapi/entry.cgi", ssoUrl);
+      apiUrl.searchParams.append("api", "SYNO.Core.Group.Member");
+      apiUrl.searchParams.append("version", "1");
+      apiUrl.searchParams.append("method", "list");
+      apiUrl.searchParams.append("group_name", "neighbors");
+      // apiUrl.searchParams.append("Syno", groupName);
+
+      console.log("Fetching Synology group members from:", apiUrl.toString());
+      const response = await fetch(apiUrl.toString(), {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch group members: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        console.error("Synology API error:", data.error);
+        return res.status(500).json({ error: "Failed to fetch group members from Synology" });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Error fetching Synology group members:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+  app.get("/session-token", validateLogin, async (req, res) => {
+    const accessToken = req.signedCookies && req.signedCookies.accessToken;
+    if (!accessToken) {
+      return res.status(401).json({ error: "Unauthorized: No access token" });
+    }
+
+    try {
+      const apiUrl = new URL("/webapi/entry.cgi?api=SYNO.API.Auth", ssoUrl);
+      apiUrl.searchParams.append("version", "7");
+      apiUrl.searchParams.append("method", "login");
+
+      console.log("Authenticating with Synology API");
+
+      const response = await fetch(apiUrl.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          api: "SYNO.API.Auth",
+          token: accessToken,
+          enable_syno_token: "yes",
+          type: "sso",
+          version: "7",
+          method: "login",
+          ssotype: "synosso",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to authenticate with Synology: ${response.statusText}`);
+      }
+
+      const parsed = await response.json();
+
+      if (!parsed.success) {
+        console.error("Synology authentication error:", parsed.error);
+        return res.status(500).json({ error: "Failed to authenticate with Synology" });
+      }
+
+      const { synotoken } = parsed.data;
+
+      res.status(200).json({
+        token: synotoken,
+      });
+    } catch (error) {
+      console.error("Error authenticating with Synology:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   });
 }
