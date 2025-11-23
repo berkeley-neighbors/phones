@@ -1,0 +1,11 @@
+.phonebook-table__row {
+  transition: background-color 0.2s ease;
+}
+
+.phonebook-table__row:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.phonebook-table__row:active {
+  background-color: #e5e7eb !important;
+}

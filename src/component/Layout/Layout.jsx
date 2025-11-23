@@ -1,4 +1,4 @@
-import { InboxOutlined, SendOutlined, TeamOutlined, PhoneOutlined } from "@ant-design/icons";
+import { InboxOutlined, SendOutlined, TeamOutlined, PhoneOutlined, BookOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Snackbar } from "../Snackbar/Snackbar";
 import { useSnackbar } from "@/context/SnackbarContext";
@@ -33,6 +33,10 @@ const NavBar = () => {
     navigate("/calls");
   };
 
+  const navigateToPhoneBook = () => {
+    navigate("/phonebook");
+  };
+
   return (
     <>
       <nav className="flex justify-between text-white px-1 sm:px-4">
@@ -52,6 +56,10 @@ const NavBar = () => {
           <NavItem onClick={navigateToStaff}>
             <TeamOutlined className="text-lg" />
             <span className="mt-1">Staff</span>
+          </NavItem>
+          <NavItem onClick={navigateToPhoneBook}>
+            <BookOutlined className="text-lg" />
+            <span className="mt-1">Directory</span>
           </NavItem>
         </div>
       </nav>

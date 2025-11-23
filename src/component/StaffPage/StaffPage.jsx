@@ -83,8 +83,8 @@ export const StaffPage = () => {
 
   return (
     <Layout>
-      <h3>Staff Management</h3>
-
+      <h3>Alert Staff</h3>
+      <sub>Manage numbers that receive phone alerts</sub>
       <div className="staff-page__form">
         <form onSubmit={handleSubmit}>
           <div className="staff-page__form-group">

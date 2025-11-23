@@ -82,6 +82,7 @@ async function startServer() {
           databaseName: MONGO_DATABASE,
           staffCollectionName: "staff",
           threadCollectionName: "threads",
+          phoneBookCollectionName: "phonebook",
         },
       },
       twilioOptions,

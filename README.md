@@ -6,6 +6,14 @@ Web application to send and read SMS messages on behalf of Berkeley Neighbors.
 
 Originally forked from [twilio-sms-web](https://github.com/rafacandev/twilio-sms-web). License included with this repository.
 
+## Please note
+
+This is alpha-level software customized to a specific org
+
+* Features may be added or removed without notice
+* Internals may shift rapidly
+* Documentation will be likely out-of-date for the near future
+
 # Twilio Account
 
 You will need a Twilio account to read and send SMS messages.
