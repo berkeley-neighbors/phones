@@ -16,11 +16,15 @@ import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage"
 
 export const App = () => {
   const [loading, setLoading] = useState(true);
+  const [isForbidden, setIsForbidden] = useState(false);
 
   useEffect(() => {
     const fetchSessionToken = async () => {
       try {
-        await fetch("/api/session-token");
+        const response = await fetch("/api/session-token");
+        if (response.status === 403) {
+          setIsForbidden(true);
+        }
       } catch (error) {
         console.error("Failed to fetch session token:", error);
       } finally {
@@ -40,6 +44,10 @@ export const App = () => {
         </div>
       </div>
     );
+  }
+
+  if (isForbidden) {
+    return <ForbiddenErrorPage />;
   }
 
   return (
