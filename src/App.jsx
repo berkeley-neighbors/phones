@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
 import { APIContext, APIInstance } from "@/context/APIContext";
@@ -15,9 +15,32 @@ import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErro
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage";
 
 export const App = () => {
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const token = fetch("/api/session-token");
+    const fetchSessionToken = async () => {
+      try {
+        await fetch("/api/session-token");
+      } catch (error) {
+        console.error("Failed to fetch session token:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessionToken();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-200">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-violet-900 mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <APIContext value={APIInstance}>
