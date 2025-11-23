@@ -1,16 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "tailwindcss";
-import { config } from "dotenv";
 import { resolve } from "path";
-
-config();
-
-let API_TOKEN = process.env.API_TOKEN;
-
-if (!API_TOKEN) {
-  throw new Error("API_TOKEN environment variable is not set.");
-}
 
 process.env.VITE_SYNOLOGY_SSO_APP_ID = process.env.SYNOLOGY_SSO_APP_ID;
 process.env.VITE_SYNOLOGY_SSO_URL = process.env.SYNOLOGY_SSO_URL;
