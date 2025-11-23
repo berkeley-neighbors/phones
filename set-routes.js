@@ -444,7 +444,7 @@ export function setRoutes(
           return res.status(403).json({ error: "Access denied: User not in allowed group" });
         }
 
-        const hasMembership = result.data.users.find(user => user.account === account);
+        const hasMembership = result.data.users.find(user => user.name === account);
 
         if (!hasMembership) {
           console.error("User not in allowed group:", allowedGroup);
