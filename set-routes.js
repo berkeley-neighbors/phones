@@ -182,7 +182,8 @@ export function setRoutes(
       return res.status(400).send("Bad Request: Missing To or Body");
     }
 
-    console.log("Sending message:", { to, body });
+    console.debug("Sending message:", { to, body });
+    console.debug("Using outbound number:", outboundNumber);
     try {
       const response = await fetch(
         `${getMessagesUrl()}?${new URLSearchParams({
