@@ -1,5 +1,14 @@
-import { GithubOutlined, InboxOutlined, SendOutlined, FileTextFilled, LogoutOutlined, TeamOutlined } from "@ant-design/icons"
-import { useNavigate } from "react-router-dom"
+import {
+  GithubOutlined,
+  InboxOutlined,
+  SendOutlined,
+  FileTextFilled,
+  LogoutOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { Snackbar } from "../Snackbar/Snackbar";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 const NavItem = ({ className, children, onClick = () => {} }) => (
   <span
@@ -8,22 +17,22 @@ const NavItem = ({ className, children, onClick = () => {} }) => (
   >
     {children}
   </span>
-)
+);
 
 const NavBar = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const navigateToInbox = () => {
-    navigate("/")
-  }
+    navigate("/");
+  };
 
   const navigateToSend = () => {
-    navigate("/send")
-  }
+    navigate("/send");
+  };
 
   const navigateToStaff = () => {
-    navigate("/staff")
-  }
+    navigate("/staff");
+  };
 
   return (
     <>
@@ -42,46 +51,34 @@ const NavBar = () => {
             <span className="mt-1">Staff</span>
           </NavItem>
         </div>
-        <div className="flex items-center text-lg">Berkeley Neighbors Phone System</div>
       </nav>
     </>
-  )
-}
+  );
+};
 
 const Footer = () => (
   <div className="w-full py-2 text-white flex flex-col items-center text-xs gap-1">
     <span>Berkeley Neighbors Phone System</span>
   </div>
-)
+);
 
-export const Layout = ({ children }) => (
-  <div className="flex flex-col min-h-full bg-gray-200">
-    <div className="bg-violet-900 flex justify-center">
-      <span className="block h-14 w-full max-w-screen-lg">
-        <NavBar />
-      </span>
-    </div>
-    <div className="grow flex justify-center">
-      <span className="block bg-gray-50 w-full max-w-screen-lg p-1 sm:p-4">{children}</span>
-    </div>
-    <div className="bg-violet-900">
-      <Footer />
-    </div>
-  </div>
-)
+export const Layout = ({ children }) => {
+  const { notifications, dismissNotification } = useSnackbar();
 
-export const LayoutWithoutNavBar = ({ children }) => (
-  <div className="flex flex-col h-full">
-    <div className="flex h-14">
-      <div className="bg-violet-900 grow flex justify-center items-center text-lg text-white">Berkeley Neighbors Phone System</div>
+  return (
+    <div className="flex flex-col min-h-full bg-gray-200">
+      <div className="bg-violet-900 flex justify-center">
+        <span className="block h-14 w-full max-w-screen-lg">
+          <NavBar />
+        </span>
+      </div>
+      <div className="grow flex justify-center">
+        <span className="block bg-gray-50 w-full max-w-screen-lg p-1 sm:p-4">{children}</span>
+      </div>
+      <div className="bg-violet-900">
+        <Footer />
+      </div>
+      <Snackbar notifications={notifications} onDismiss={dismissNotification} />
     </div>
-    <div className="flex grow">
-      <div className="bg-gray-200 grow"></div>
-      <div className="bg-gray-100 w-full max-w-screen-md pt-2 pb-4 px-4">{children}</div>
-      <div className="bg-gray-200 grow"></div>
-    </div>
-    <div className="bg-violet-900">
-      <Footer />
-    </div>
-  </div>
-)
+  );
+};
