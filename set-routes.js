@@ -311,7 +311,7 @@ export function setRoutes(
     res.status(200).send("OK");
   });
 
-  app.get("/api/staff", validateLogin, async (req, res) => {
+  app.get("/staff", validateLogin, async (req, res) => {
     try {
       const staffList = await staffCollection.find({}).toArray();
       res.status(200).json(staffList);
@@ -321,7 +321,7 @@ export function setRoutes(
     }
   });
 
-  app.post("/api/staff", validateLogin, async (req, res) => {
+  app.post("/staff", validateLogin, async (req, res) => {
     try {
       const { phone_number } = req.body;
 
@@ -350,7 +350,7 @@ export function setRoutes(
     }
   });
 
-  app.delete("/api/staff/:phone_number", validateLogin, async (req, res) => {
+  app.delete("/staff/:phone_number", validateLogin, async (req, res) => {
     try {
       const { phone_number } = req.params;
 
