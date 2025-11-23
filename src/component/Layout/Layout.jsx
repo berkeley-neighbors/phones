@@ -1,11 +1,4 @@
-import {
-  GithubOutlined,
-  InboxOutlined,
-  SendOutlined,
-  FileTextFilled,
-  LogoutOutlined,
-  TeamOutlined,
-} from "@ant-design/icons";
+import { InboxOutlined, SendOutlined, TeamOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Snackbar } from "../Snackbar/Snackbar";
 import { useSnackbar } from "@/context/SnackbarContext";
@@ -58,7 +51,7 @@ const NavBar = () => {
 
 const Footer = () => (
   <div className="w-full py-2 text-white flex flex-col items-center text-xs gap-1">
-    <span>Berkeley Neighbors Phone System</span>
+    <h2 className="text-xl">Berkeley Neighbors Phone System</h2>
   </div>
 );
 
@@ -66,14 +59,14 @@ export const Layout = ({ children }) => {
   const { notifications, dismissNotification } = useSnackbar();
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-200">
+    <div className="flex flex-col min-h-screen bg-gray-200">
       <div className="bg-violet-900 flex justify-center">
         <span className="block h-14 w-full max-w-screen-lg">
           <NavBar />
         </span>
       </div>
       <div className="grow flex justify-center">
-        <span className="block bg-gray-50 w-full max-w-screen-lg p-1 sm:p-4">{children}</span>
+        <div className="block bg-gray-50 w-full max-w-screen-lg p-4">{children}</div>
       </div>
       <div className="bg-violet-900">
         <Footer />
