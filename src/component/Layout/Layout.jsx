@@ -1,4 +1,4 @@
-import { GithubOutlined, InboxOutlined, SendOutlined, FileTextFilled, LogoutOutlined } from "@ant-design/icons"
+import { GithubOutlined, InboxOutlined, SendOutlined, FileTextFilled, LogoutOutlined, TeamOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 
 const NavItem = ({ className, children, onClick = () => {} }) => (
@@ -21,6 +21,10 @@ const NavBar = () => {
     navigate("/send")
   }
 
+  const navigateToStaff = () => {
+    navigate("/staff")
+  }
+
   return (
     <>
       <nav className="flex justify-between text-white px-1 sm:px-4">
@@ -32,6 +36,10 @@ const NavBar = () => {
           <NavItem onClick={navigateToSend}>
             <SendOutlined className="text-lg" />
             <span className="mt-1">Send</span>
+          </NavItem>
+          <NavItem onClick={navigateToStaff}>
+            <TeamOutlined className="text-lg" />
+            <span className="mt-1">Staff</span>
           </NavItem>
         </div>
         <div className="flex items-center text-lg">Berkeley Neighbors Phone System</div>

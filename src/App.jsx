@@ -9,6 +9,7 @@ import { ConversationPage } from "./component/ConversationPage/ConversationPage"
 import { SendPage } from "./component/SendPage/SendPage"
 import { MessagePage } from "./component/MessagePage/MessagePage"
 import { SentPage } from "./component/SentPage/SentPage"
+import { StaffPage } from "./component/StaffPage/StaffPage"
 import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage"
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage"
   
@@ -56,6 +57,12 @@ export const App = () => {
                   path="/send/:number"
                   element={
                         <SendPage />
+                  }
+                />
+                <Route
+                  path="/staff"
+                  element={
+                    <StaffPage />
                   }
                 />
                 <Route path="*" element={<NotFoundPage />} />
