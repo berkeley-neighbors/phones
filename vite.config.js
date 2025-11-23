@@ -8,6 +8,7 @@ config();
 
 process.env.VITE_SYNOLOGY_SSO_APP_ID = process.env.SYNOLOGY_SSO_APP_ID;
 process.env.VITE_SYNOLOGY_SSO_URL = process.env.SYNOLOGY_SSO_URL;
+process.env.VITE_FOOTER_TEXT = process.env.FOOTER_TEXT;
 
 // https://vite.dev/config/
 export default defineConfig({

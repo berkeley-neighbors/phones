@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Snackbar } from "../Snackbar/Snackbar";
 import { useSnackbar } from "@/context/SnackbarContext";
 
+const FOOTER_TEXT = import.meta.env.VITE_FOOTER_TEXT || "";
+
 const NavItem = ({ className, children, onClick = () => {} }) => (
   <span
     onClick={onClick}
@@ -59,7 +61,7 @@ const NavBar = () => {
 
 const Footer = () => (
   <div className="w-full py-2 text-white flex flex-col items-center text-xs gap-1">
-    <h2 className="text-xl">Berkeley Neighbors Phone System</h2>
+    <h2 className="text-lg">{FOOTER_TEXT}</h2>
   </div>
 );
 
