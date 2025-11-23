@@ -6,7 +6,7 @@ export function setRoutes(
   app,
   { mongoClient, options: { databaseName, staffCollectionName, threadCollectionName } },
   { accountSID, token, secret },
-  { exchangePath, exchangeAction, ssoUrl, ssoAppId, groupName, inboundNumber, outboundNumber },
+  { exchangePath, exchangeAction, ssoUrl, ssoAppId, groupName, allowedGroup, inboundNumber, outboundNumber },
 ) {
   const db = mongoClient.db(databaseName);
   const staffCollection = db.collection(staffCollectionName);
@@ -375,52 +375,6 @@ export function setRoutes(
     }
   });
 
-  app.get("/synology/group-members", validateLogin, async (req, res) => {
-    try {
-      if (!groupName) {
-        return res.status(400).json({ error: "SYNOLOGY_GROUP_NAME not configured" });
-      }
-
-      const accessToken = req.signedCookies && req.signedCookies.accessToken;
-
-      if (!accessToken) {
-        return res.status(401).json({ error: "Unauthorized: No access token" });
-      }
-
-      // Call Synology API to get group members
-      const apiUrl = new URL("/webapi/entry.cgi", ssoUrl);
-      apiUrl.searchParams.append("api", "SYNO.Core.Group.Member");
-      apiUrl.searchParams.append("version", "1");
-      apiUrl.searchParams.append("method", "list");
-      apiUrl.searchParams.append("group_name", "neighbors");
-      // apiUrl.searchParams.append("Syno", groupName);
-
-      console.log("Fetching Synology group members from:", apiUrl.toString());
-      const response = await fetch(apiUrl.toString(), {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch group members: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.success) {
-        console.error("Synology API error:", data.error);
-        return res.status(500).json({ error: "Failed to fetch group members from Synology" });
-      }
-
-      res.status(200).json(data);
-    } catch (error) {
-      console.error("Error fetching Synology group members:", error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  });
-
   app.get("/session-token", validateLogin, async (req, res) => {
     const accessToken = req.signedCookies && req.signedCookies.accessToken;
     if (!accessToken) {
@@ -459,7 +413,44 @@ export function setRoutes(
         return res.status(500).json({ error: "Failed to authenticate with Synology" });
       }
 
-      const { synotoken } = parsed.data;
+      const { synotoken, sid, account } = parsed.data;
+
+      if (allowedGroup) {
+        const groupCheckUrl = new URL("/webapi/entry.cgi", ssoUrl);
+        groupCheckUrl.searchParams.append("api", "SYNO.Core.Group.Member");
+        groupCheckUrl.searchParams.append("version", "1");
+        groupCheckUrl.searchParams.append("method", "list");
+        groupCheckUrl.searchParams.append("group", allowedGroup);
+        groupCheckUrl.searchParams.append("SynoToken", synotoken);
+        groupCheckUrl.searchParams.append("_sid", sid);
+
+        console.log("Checking group membership for:", allowedGroup);
+
+        console.log("Group check URL:", groupCheckUrl.toString());
+        const groupResponse = await fetch(groupCheckUrl.toString(), {
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!groupResponse.ok) {
+          throw new Error(`Failed to check group membership: ${groupResponse.statusText}`);
+        }
+
+        const result = await groupResponse.json();
+
+        if (!result.success) {
+          console.error("Group membership check failed:", result.error);
+          return res.status(403).json({ error: "Access denied: User not in allowed group" });
+        }
+
+        const hasMembership = result.data.users.find(user => user.account === account);
+
+        if (!hasMembership) {
+          console.error("User not in allowed group:", allowedGroup);
+          return res.status(403).json({ error: "Access denied: User not in allowed group" });
+        }
+      }
 
       res.status(200).json({
         token: synotoken,
