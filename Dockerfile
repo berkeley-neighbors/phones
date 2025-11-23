@@ -1,8 +1,5 @@
 FROM node:18
 
-ENV PHONE_NUMBERS_FILE=/data/phone-numbers.json
-ENV REPLY_MESSAGE="This is a one-time automated message to confirm you're messaging the right number. Someone in the group should reply later, but you can also keep sending messages."
-ENV API_TOKEN="your_api_token_here"
 ENV ALLOWED_HOST="localhost"
 ENV TWILIO_ALLOWED_PHONE_NUMBER_INBOUND="your_twilio_allowed_phone_number_here"
 ENV TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND="your_twilio_allowed_phone_number_here"
