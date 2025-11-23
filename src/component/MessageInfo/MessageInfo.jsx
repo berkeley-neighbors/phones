@@ -1,7 +1,7 @@
-import { fromNow } from "../../js/util"
-import { CopyOutlined } from "@ant-design/icons"
-import { MediaViewer } from "../MediaViewer/MediaViewer"
-import { copyToClipboard } from "../../js/util"
+import { fromNow } from "../../js/util";
+import { CopyOutlined } from "@ant-design/icons";
+import { MediaViewer } from "../MediaViewer/MediaViewer";
+import { copyToClipboard } from "../../js/util";
 
 /**
  * @typedef {import("../../js/types").Message} Message
@@ -18,13 +18,6 @@ export const MessageInfo = ({ message }) => (
     <div>
       <span className="capitalize inline-block w-full max-w-60 py-1">
         <b>Direction:</b> {message.direction}
-      </span>
-      <span
-        className="capitalize hover:cursor-pointer active:text-gray-600"
-        onClick={() => copyToClipboard(message.messageSid)}
-      >
-        <CopyOutlined className="text-gray-500 pr-1" />
-        <b>MessageSid:</b> {message.messageSid}
       </span>
     </div>
     <div>
@@ -61,4 +54,4 @@ export const MessageInfo = ({ message }) => (
       <MediaViewer messageSid={message.messageSid} />
     </div>
   </div>
-)
+);

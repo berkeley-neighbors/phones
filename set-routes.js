@@ -6,13 +6,15 @@ export function setRoutes(
   app,
   { mongoClient, options: { databaseName, staffCollectionName, threadCollectionName } },
   { accountSID, token, secret },
-  { exchangePath, exchangeAction, ssoUrl, ssoAppId, groupName, allowedGroup, inboundNumber, outboundNumber },
+  { exchangePath, exchangeAction, ssoUrl, ssoAppId, allowedGroup, inboundNumber, outboundNumber },
 ) {
   const db = mongoClient.db(databaseName);
   const staffCollection = db.collection(staffCollectionName);
   const threadCollection = db.collection(threadCollectionName);
 
   const getMessagesUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Messages.json`;
+
+  const getCallsUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Calls.json`;
 
   const getMessageBySidUrl = messageSid => {
     return `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Messages/${messageSid}.json`;
@@ -172,6 +174,76 @@ export function setRoutes(
       res.status(200).json({ messages });
     } catch (error) {
       console.error("Error fetching messages:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+
+  app.get("/calls", validateLogin, async (req, res) => {
+    const { filter } = req.query;
+
+    console.log("Fetching calls with params:", { filter });
+    try {
+      const requests = [];
+      if (filter) {
+        if (filter === "all" || filter === "received") {
+          requests.push(
+            fetch(
+              `${getCallsUrl()}?${new URLSearchParams({
+                To: inboundNumber,
+              }).toString()}`,
+              {
+                headers: {
+                  Authorization: getAuthorizationHeader(),
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+              },
+            ),
+          );
+        }
+
+        if (filter === "all" || filter === "made") {
+          requests.push(
+            fetch(
+              `${getCallsUrl()}?${new URLSearchParams({
+                From: inboundNumber,
+              }).toString()}`,
+              {
+                headers: {
+                  Authorization: getAuthorizationHeader(),
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+              },
+            ),
+          );
+        }
+      } else {
+        requests.push(
+          fetch(getCallsUrl(), {
+            headers: {
+              Authorization: getAuthorizationHeader(),
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }),
+        );
+      }
+
+      const responses = await Promise.all(requests);
+      const calls = [];
+      for (const response of responses) {
+        if (response.status === 403) {
+          return res.status(403).send("Forbidden: Not authenticated");
+        }
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch calls: ${response.statusText}`);
+        }
+        const data = await response.json();
+        calls.push(...data.calls);
+      }
+
+      res.status(200).json({ calls });
+    } catch (error) {
+      console.error("Error fetching calls:", error);
       res.status(500).send("Internal Server Error");
     }
   });
@@ -424,9 +496,8 @@ export function setRoutes(
         groupCheckUrl.searchParams.append("SynoToken", synotoken);
         groupCheckUrl.searchParams.append("_sid", sid);
 
-        console.log("Checking group membership for:", allowedGroup);
+        console.debug("Checking group membership for:", allowedGroup);
 
-        console.log("Group check URL:", groupCheckUrl.toString());
         const groupResponse = await fetch(groupCheckUrl.toString(), {
           headers: {
             Accept: "application/json",
