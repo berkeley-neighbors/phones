@@ -4,3 +4,5 @@
 export { Router as StaffRouter } from "./staff.js";
 export { Router as PhonebookRouter } from "./phonebook.js";
 export { Router as MessageRouter } from "./message.js";
+export { Router as ConfigRouter } from "./config.js";
+export { Router as CallsRouter } from "./calls.js";

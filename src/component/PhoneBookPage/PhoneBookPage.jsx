@@ -3,8 +3,12 @@ import { Layout } from "../Layout/Layout";
 import { useSnackbar } from "@/context/SnackbarContext";
 import { PhoneBookModal } from "./PhoneBookModal";
 import "./PhoneBookPage.css";
+import { useContext } from "react";
+import { APIContext } from "@/context/APIContext";
 
 export const PhoneBookPage = () => {
+  const api = useContext(APIContext);
+
   const [phoneBookEntries, setPhoneBookEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -18,11 +22,8 @@ export const PhoneBookPage = () => {
 
   const loadPhoneBookEntries = async () => {
     try {
-      const response = await fetch("/api/phonebook");
-      if (!response.ok) {
-        throw new Error("Failed to load phone book entries");
-      }
-      const data = await response.json();
+      const { data } = await api.get("/api/phonebook");
+
       setPhoneBookEntries(data || []);
     } catch (error) {
       addNotification(`Error loading phone book: ${error.message}`, "error");
@@ -38,18 +39,13 @@ export const PhoneBookPage = () => {
       const url = editingEntry ? `/api/phonebook/${editingEntry._id}` : "/api/phonebook";
       const method = editingEntry ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      await api(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        data: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to save phone book entry");
-      }
 
       addNotification(editingEntry ? "Entry updated successfully!" : "Entry added successfully!", "success");
       setIsModalOpen(false);
@@ -68,14 +64,7 @@ export const PhoneBookPage = () => {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/phonebook/${editingEntry._id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to remove entry");
-      }
+      await api.delete(`/api/phonebook/${editingEntry._id}`);
 
       addNotification("Entry successfully removed!", "success");
       setIsModalOpen(false);

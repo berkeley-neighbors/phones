@@ -33,9 +33,7 @@ export const InboxPage = () => {
   useEffect(() => {
     getTwilioPhoneNumbers(api)
       .then(phoneNumbers => {
-        if (phoneNumbers.length > 0) {
-          setPhoneNumber(phoneNumbers[0]);
-        }
+        setPhoneNumber(phoneNumbers.inbound_number || "");
       })
       .catch(setError)
       .finally(() => setLoadingPhones(false));

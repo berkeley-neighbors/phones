@@ -2,15 +2,15 @@ import express from "express";
 import { auth } from "../middleware.js";
 import { Buffer } from "buffer";
 import { getEnvironmentVariable } from "../get-environment-variable.js";
+import { ConfigClient } from "../clients/config.js";
 
 const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
 const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
 const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
-const TWILIO_ALLOWED_PHONE_NUMBER_INBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_INBOUND");
-const TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND");
 
-export function Router() {
+export function Router(db) {
   const router = express.Router();
+  const configClient = new ConfigClient(db);
 
   const getMessagesUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
   const getMessageBySidUrl = messageSid => {
@@ -30,13 +30,15 @@ export function Router() {
 
     console.log("Fetching messages with params:", { from, to, filter });
     try {
+      const config = await configClient.getValuesByKeys(["inbound_number", "outbound_number"]);
+
       const requests = [];
       if (filter) {
         if (filter === "all" || filter === "received") {
           requests.push(
             fetch(
               `${getMessagesUrl()}?${new URLSearchParams({
-                To: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
+                To: config.get("inbound_number"),
               }).toString()}`,
               {
                 headers: {
@@ -52,7 +54,7 @@ export function Router() {
           requests.push(
             fetch(
               `${getMessagesUrl()}?${new URLSearchParams({
-                From: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
+                From: config.get("outbound_number"),
               }).toString()}`,
               {
                 headers: {
@@ -69,7 +71,7 @@ export function Router() {
             fetch(
               `${getMessagesUrl()}?${new URLSearchParams({
                 From: from,
-                To: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
+                To: config.get("inbound_number"),
               }).toString()}`,
               {
                 headers: {
@@ -86,7 +88,7 @@ export function Router() {
             fetch(
               `${getMessagesUrl()}?${new URLSearchParams({
                 To: to,
-                From: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
+                From: config.get("inbound_number"),
               }).toString()}`,
               {
                 headers: {
@@ -126,13 +128,14 @@ export function Router() {
       return res.status(400).send("Bad Request: Missing To or Body");
     }
 
-    console.debug("Sending message:", { to, body });
-    console.debug("Using outbound number:", TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND);
     try {
+      const config = await configClient.getValuesByKeys("outbound_number");
+
+      console.debug("Sending message:", { to, body });
       const response = await fetch(
         `${getMessagesUrl()}?${new URLSearchParams({
           To: to,
-          From: TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND,
+          From: config.get("outbound_number"),
           Body: body,
         })}`,
         {

@@ -125,17 +125,7 @@ export const CallsPage = () => {
           params.append("filter", callFilter);
         }
 
-        const response = await fetch(`/api/calls?${params.toString()}`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch calls: ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const { data } = await api.get(`/api/calls?${params.toString()}`);
 
         // Sort calls by date, most recent first
         const sortedCalls = (data.calls || []).sort((a, b) => {

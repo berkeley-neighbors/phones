@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { Layout } from "../Layout/Layout";
 import { useSnackbar } from "@/context/SnackbarContext";
 import "./StaffPage.css";
+import { useContext } from "react";
+import { APIContext } from "@/context/APIContext";
 
 export const StaffPage = () => {
+  const api = useContext(APIContext);
+
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -16,11 +20,8 @@ export const StaffPage = () => {
 
   const loadStaffMembers = async () => {
     try {
-      const response = await fetch("/api/staff");
-      if (!response.ok) {
-        throw new Error("Failed to load staff members");
-      }
-      const data = await response.json();
+      const { data } = await api.get("/api/staff");
+
       setStaffMembers(data || []);
     } catch (error) {
       addNotification(`Error loading staff: ${error.message}`, "error");
@@ -34,20 +35,9 @@ export const StaffPage = () => {
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/staff", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone_number: phoneNumber,
-        }),
+      await api.post("/api/staff", {
+        phone_number: phoneNumber,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to add staff member");
-      }
 
       addNotification("Staff member added successfully!", "success");
       setPhoneNumber("");
@@ -65,14 +55,7 @@ export const StaffPage = () => {
     }
 
     try {
-      const response = await fetch(`/api/staff/${encodeURIComponent(phoneNumber)}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to remove staff member");
-      }
+      await api.delete(`/api/staff/${encodeURIComponent(phoneNumber)}`);
 
       addNotification(`${phoneNumber} successfully removed!`, "success");
       await loadStaffMembers();

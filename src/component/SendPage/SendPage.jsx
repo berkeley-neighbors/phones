@@ -23,7 +23,7 @@ export const SendPage = () => {
 
   useEffect(() => {
     getTwilioPhoneNumbers(api)
-      .then(phonesNumbers => setFrom(phonesNumbers[0]))
+      .then(phonesNumbers => setFrom(phonesNumbers.outbound_number || ""))
       .catch(setError)
       .finally(() => setLoadingPhoneNumbers(false));
   }, []);

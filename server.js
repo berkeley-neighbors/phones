@@ -58,7 +58,8 @@ async function startServer() {
 
     app.use(mongo(connectedClient, MONGO_DATABASE));
 
-    setRoutes(app);
+    const db = connectedClient.db(MONGO_DATABASE);
+    setRoutes(app, db);
 
     if (process.env.NODE_ENV === "production") {
       const distPath = path.join(__dirname, "dist");
