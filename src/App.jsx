@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import { APIContext, APIInstance } from "@/context/APIContext";
 import { ComposerProvider } from "@/context/ComposerProvider";
@@ -55,9 +55,9 @@ export const App = () => {
 
   return (
     <APIContext value={APIInstance}>
-      <SnackbarProvider>
-        <ComposerProvider>
-          <Router>
+      <ComposerProvider>
+        <Router>
+          <SnackbarProvider>
             <div className="min-h-screen">
               <Routes>
                 <Route path="/403" element={<ForbiddenErrorPage />} />
@@ -75,9 +75,9 @@ export const App = () => {
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </div>
-          </Router>
-        </ComposerProvider>
-      </SnackbarProvider>
+          </SnackbarProvider>
+        </Router>
+      </ComposerProvider>
     </APIContext>
   );
 };

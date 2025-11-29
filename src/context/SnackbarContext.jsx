@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const SnackbarContext = createContext();
 
@@ -12,6 +13,12 @@ export const useSnackbar = () => {
 
 export const SnackbarProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
+  const location = useLocation();
+
+  // Dismiss as we move
+  useEffect(() => {
+    setNotifications([]);
+  }, [location.pathname]);
 
   const addNotification = (message, type = "info") => {
     const notification = {
