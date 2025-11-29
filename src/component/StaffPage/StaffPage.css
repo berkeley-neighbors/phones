@@ -103,3 +103,34 @@
 .staff-table__button:hover {
   background-color: #c0392b;
 }
+
+/* Badge for active/inactive status */
+.staff-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.staff-badge--active {
+  background-color: #27ae60;
+  color: white;
+}
+
+.staff-badge--active:hover {
+  background-color: #229954;
+  transform: scale(1.05);
+}
+
+.staff-badge--inactive {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.staff-badge--inactive:hover {
+  background-color: #7f8c8d;
+  transform: scale(1.05);
+}

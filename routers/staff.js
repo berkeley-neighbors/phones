@@ -47,6 +47,36 @@ export function Router() {
     }
   });
 
+  router.put("/:phone_number", async (req, res) => {
+    try {
+      const { phone_number } = req.params;
+      const { active } = req.body;
+
+      if (!phone_number) {
+        return res.status(400).json({ error: "Phone number is required" });
+      }
+
+      if (typeof active !== "boolean") {
+        return res.status(400).json({ error: "Active must be a boolean value" });
+      }
+
+      const result = await collection.read(req).updateOne({ phone_number }, { $set: { active } });
+
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ error: "Phone number not found" });
+      }
+
+      res.status(200).json({
+        message: "Staff member updated successfully",
+        phone_number,
+        active,
+      });
+    } catch (error) {
+      console.error("Error updating staff:", error);
+      res.status(500).json({ error: "Failed to update staff" });
+    }
+  });
+
   router.delete("/:phone_number", async (req, res) => {
     try {
       const { phone_number } = req.params;

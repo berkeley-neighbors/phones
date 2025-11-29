@@ -64,6 +64,19 @@ export const StaffPage = () => {
     }
   };
 
+  const toggleActive = async (phoneNumber, currentActive) => {
+    try {
+      await api.put(`/api/staff/${encodeURIComponent(phoneNumber)}`, {
+        active: !currentActive,
+      });
+
+      addNotification(`${phoneNumber} ${!currentActive ? "activated" : "deactivated"}`, "success");
+      await loadStaffMembers();
+    } catch (error) {
+      addNotification(error.message, "error");
+    }
+  };
+
   return (
     <Layout>
       <h3>Alert Staff</h3>
@@ -101,6 +114,7 @@ export const StaffPage = () => {
             <thead>
               <tr>
                 <th className="staff-table__header">Phone Number</th>
+                <th className="staff-table__header">Status</th>
                 <th className="staff-table__header">Actions</th>
               </tr>
             </thead>
@@ -109,6 +123,16 @@ export const StaffPage = () => {
                 <tr key={member._id} className="staff-table__row">
                   <td className="staff-table__cell">
                     <strong>{member.phone_number}</strong>
+                  </td>
+                  <td className="staff-table__cell">
+                    <span
+                      className={`staff-badge ${member.active ? "staff-badge--active" : "staff-badge--inactive"}`}
+                      onClick={() => toggleActive(member.phone_number, member.active)}
+                      style={{ cursor: "pointer" }}
+                      title={`Click to ${member.active ? "deactivate" : "activate"}`}
+                    >
+                      {member.active ? "Active" : "Inactive"}
+                    </span>
                   </td>
                   <td className="staff-table__cell">
                     <button className="staff-table__button" onClick={() => removeStaff(member.phone_number)}>
