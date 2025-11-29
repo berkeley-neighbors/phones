@@ -47,6 +47,7 @@ export function Router() {
     }
   });
 
+  // Just used for toggling active state today
   router.put("/:phone_number", async (req, res) => {
     try {
       const { phone_number } = req.params;
