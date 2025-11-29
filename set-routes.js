@@ -1,18 +1,9 @@
 import { URL } from "url";
 import { Buffer } from "buffer";
-import { ObjectId } from "mongodb";
+import { staff, phonebook } from "./routers/index.js";
+import { auth } from "./middleware.js";
 
-export function setRoutes(
-  app,
-  { mongoClient, options: { databaseName, staffCollectionName, threadCollectionName, phoneBookCollectionName } },
-  { accountSID, token, secret },
-  { exchangePath, exchangeAction, ssoUrl, ssoAppId, allowedGroup, inboundNumber, outboundNumber },
-) {
-  const db = mongoClient.db(databaseName);
-  const staffCollection = db.collection(staffCollectionName);
-  const threadCollection = db.collection(threadCollectionName);
-  const phoneBookCollection = db.collection(phoneBookCollectionName);
-
+export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedGroup, inboundNumber, outboundNumber }) {
   const getMessagesUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Messages.json`;
 
   const getCallsUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Calls.json`;
@@ -33,50 +24,6 @@ export function setRoutes(
     return `Basic ${Buffer.from(`${token}:${secret}`).toString("base64")}`;
   };
 
-  async function validateLogin(req, res, next) {
-    const accessToken = req.signedCookies && req.signedCookies.accessToken;
-
-    if (!accessToken) {
-      console.error("No accessToken cookie found");
-      return res.status(401).json({ error: "Unauthorized: No accessToken cookie found" });
-    }
-
-    const tokenExchangeURL = new URL(exchangePath, ssoUrl);
-    tokenExchangeURL.searchParams.append("action", exchangeAction);
-    tokenExchangeURL.searchParams.append("app_id", ssoAppId);
-    tokenExchangeURL.searchParams.append("access_token", accessToken);
-
-    const parsed = await fetch(tokenExchangeURL.toString(), {
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!parsed.ok) {
-      console.error(`Failed to validate access token: ${parsed.statusText}`);
-      return res.status(500).send("Internal Server Error");
-    }
-
-    try {
-      const data = await parsed.json();
-
-      if (!data) {
-        console.error("No data returned from token exchange");
-        return res.status(401).send("Unauthorized: Invalid access token");
-      }
-
-      if (!data.success) {
-        console.error("Token exchange failed:", data.error);
-        return res.status(401).send("Unauthorized: Invalid access token");
-      }
-    } catch (error) {
-      console.error("Error parsing token exchange response:", error);
-      return res.status(500).send("Internal Server Error");
-    }
-
-    next();
-  }
-
   app.get("/health", (req, res) => {
     res.status(200).json({
       status: "healthy",
@@ -84,7 +31,7 @@ export function setRoutes(
     });
   });
 
-  app.get("/messages", validateLogin, async (req, res) => {
+  app.get("/messages", auth, async (req, res) => {
     const { from, to, filter } = req.query;
 
     console.log("Fetching messages with params:", { from, to, filter });
@@ -179,7 +126,7 @@ export function setRoutes(
     }
   });
 
-  app.get("/calls", validateLogin, async (req, res) => {
+  app.get("/calls", auth, async (req, res) => {
     const { filter } = req.query;
 
     console.log("Fetching calls with params:", { filter });
@@ -249,7 +196,7 @@ export function setRoutes(
     }
   });
 
-  app.post("/messages", validateLogin, async (req, res) => {
+  app.post("/messages", auth, async (req, res) => {
     const { to, body } = req.body;
     if (!to || !body) {
       return res.status(400).send("Bad Request: Missing To or Body");
@@ -288,7 +235,7 @@ export function setRoutes(
     }
   });
 
-  app.get("/messages/:messageSid/media", validateLogin, async (req, res) => {
+  app.get("/messages/:messageSid/media", auth, async (req, res) => {
     const messageSid = req.params.messageSid;
     if (!messageSid) {
       return res.status(400).send("Bad Request: Missing message SID");
@@ -309,7 +256,7 @@ export function setRoutes(
     }
   });
 
-  app.get("/messages/:messageSid", validateLogin, async (req, res) => {
+  app.get("/messages/:messageSid", auth, async (req, res) => {
     const messageSid = req.params.messageSid;
     if (!messageSid) {
       return res.status(400).send("Bad Request: Missing message SID");
@@ -331,7 +278,7 @@ export function setRoutes(
     }
   });
 
-  app.get("/phone-numbers", validateLogin, async (req, res) => {
+  app.get("/phone-numbers", auth, async (req, res) => {
     try {
       const response = await fetch(getPhoneNumbersUrl(), {
         headers: {
@@ -385,165 +332,11 @@ export function setRoutes(
     res.status(200).send("OK");
   });
 
-  app.get("/staff", validateLogin, async (req, res) => {
-    try {
-      const staffList = await staffCollection.find({}).toArray();
-      res.status(200).json(staffList);
-    } catch (error) {
-      console.error("Error retrieving staff:", error);
-      res.status(500).json({ error: "Failed to retrieve staff" });
-    }
-  });
+  app.use("/staff", staff);
+  app.use("/phonebook", phonebook);
+  app.use("/session-token", auth);
 
-  app.post("/staff", validateLogin, async (req, res) => {
-    try {
-      const { phone_number } = req.body;
-
-      if (!phone_number) {
-        return res.status(400).json({ error: "Invalid request: phone_number is required" });
-      }
-
-      // Check if phone number already exists
-      const existingStaff = await staffCollection.findOne({ phone_number });
-
-      if (existingStaff) {
-        return res.status(409).json({ error: "Phone number already exists" });
-      }
-
-      const newStaff = {
-        _id: new ObjectId(),
-        phone_number,
-        active: true,
-      };
-
-      await staffCollection.insertOne(newStaff);
-      res.status(201).json(newStaff);
-    } catch (error) {
-      console.error("Error adding staff:", error);
-      res.status(500).json({ error: "Failed to add staff" });
-    }
-  });
-
-  app.delete("/staff/:phone_number", validateLogin, async (req, res) => {
-    try {
-      const { phone_number } = req.params;
-
-      if (!phone_number) {
-        return res.status(400).json({ error: "Phone number is required" });
-      }
-
-      const result = await staffCollection.deleteOne({ phone_number });
-
-      if (result.deletedCount === 0) {
-        return res.status(404).json({ error: "Phone number not found" });
-      }
-
-      res.status(200).json({
-        message: "Staff member removed successfully",
-        phone_number,
-      });
-    } catch (error) {
-      console.error("Error removing staff:", error);
-      res.status(500).json({ error: "Failed to remove staff" });
-    }
-  });
-
-  app.get("/phonebook", validateLogin, async (req, res) => {
-    try {
-      const phoneBookList = await phoneBookCollection.find({}).toArray();
-      res.status(200).json(phoneBookList);
-    } catch (error) {
-      console.error("Error retrieving phone book:", error);
-      res.status(500).json({ error: "Failed to retrieve phone book" });
-    }
-  });
-
-  app.post("/phonebook", validateLogin, async (req, res) => {
-    try {
-      const { name, description, phone_number } = req.body;
-
-      if (!name || !phone_number) {
-        return res.status(400).json({ error: "Invalid request: name and phone_number are required" });
-      }
-
-      const newEntry = {
-        _id: new ObjectId(),
-        name,
-        description: description || "",
-        phone_number,
-        created_at: new Date(),
-      };
-
-      await phoneBookCollection.insertOne(newEntry);
-      res.status(201).json(newEntry);
-    } catch (error) {
-      console.error("Error adding phone book entry:", error);
-      res.status(500).json({ error: "Failed to add phone book entry" });
-    }
-  });
-
-  app.put("/phonebook/:id", validateLogin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { name, description, phone_number } = req.body;
-
-      if (!name || !phone_number) {
-        return res.status(400).json({ error: "Invalid request: name and phone_number are required" });
-      }
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid entry ID" });
-      }
-
-      const result = await phoneBookCollection.updateOne(
-        { _id: new ObjectId(id) },
-        {
-          $set: {
-            name,
-            description: description || "",
-            phone_number,
-            updated_at: new Date(),
-          },
-        },
-      );
-
-      if (result.matchedCount === 0) {
-        return res.status(404).json({ error: "Entry not found" });
-      }
-
-      const updatedEntry = await phoneBookCollection.findOne({ _id: new ObjectId(id) });
-      res.status(200).json(updatedEntry);
-    } catch (error) {
-      console.error("Error updating phone book entry:", error);
-      res.status(500).json({ error: "Failed to update phone book entry" });
-    }
-  });
-
-  app.delete("/phonebook/:id", validateLogin, async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      if (!ObjectId.isValid(id)) {
-        return res.status(400).json({ error: "Invalid entry ID" });
-      }
-
-      const result = await phoneBookCollection.deleteOne({ _id: new ObjectId(id) });
-
-      if (result.deletedCount === 0) {
-        return res.status(404).json({ error: "Entry not found" });
-      }
-
-      res.status(200).json({
-        message: "Phone book entry removed successfully",
-        id,
-      });
-    } catch (error) {
-      console.error("Error removing phone book entry:", error);
-      res.status(500).json({ error: "Failed to remove phone book entry" });
-    }
-  });
-
-  app.get("/session-token", validateLogin, async (req, res) => {
+  app.get("/session-token", async (req, res) => {
     const accessToken = req.signedCookies && req.signedCookies.accessToken;
     if (!accessToken) {
       return res.status(401).json({ error: "Unauthorized: No access token" });
