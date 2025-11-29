@@ -5,6 +5,9 @@ import { setRoutes } from "./set-routes.js";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
 import cookieParser from "cookie-parser";
 import { mongo } from "./middleware.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
 const app = express();
 
 const PORT = 4000;
@@ -12,14 +15,8 @@ const PORT = 4000;
 const COOKIE_SECRET = getEnvironmentVariable("COOKIE_SECRET");
 const MONGO_CONNECTION_STR = getEnvironmentVariable("MONGO_CONNECTION_STR", "mongodb://localhost:27017");
 const MONGO_DATABASE = getEnvironmentVariable("MONGO_DATABASE", "dispatch");
-const TWILIO_ALLOWED_PHONE_NUMBER_INBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_INBOUND");
-const TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND");
-const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
-const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
-const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
-const SYNOLOGY_SSO_URL = getEnvironmentVariable("SYNOLOGY_SSO_URL");
-const SYNOLOGY_SSO_APP_ID = getEnvironmentVariable("SYNOLOGY_SSO_APP_ID");
-const SYNOLOGY_ALLOWED_GROUP = getEnvironmentVariable("SYNOLOGY_ALLOWED_GROUP", "");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function connectMongoDB() {
   try {
@@ -61,21 +58,13 @@ async function startServer() {
 
     app.use(mongo(connectedClient, MONGO_DATABASE));
 
-    const twilioOptions = {
-      accountSID: TWILIO_ACCOUNT_SID,
-      token: TWILIO_API_TOKEN,
-      secret: TWILIO_API_SECRET,
-    };
+    setRoutes(app);
 
-    const ssoOptions = {
-      ssoUrl: SYNOLOGY_SSO_URL,
-      ssoAppId: SYNOLOGY_SSO_APP_ID,
-      allowedGroup: SYNOLOGY_ALLOWED_GROUP,
-      inboundNumber: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
-      outboundNumber: TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND,
-    };
-
-    setRoutes(app, twilioOptions, ssoOptions);
+    if (process.env.NODE_ENV === "production") {
+      const distPath = path.join(__dirname, "dist");
+      app.use(express.static(distPath));
+      console.log(`Serving static files from: ${distPath}`);
+    }
 
     app.listen(PORT, "0.0.0.0", () => {
       console.debug(`API instance running on port ${PORT}`);

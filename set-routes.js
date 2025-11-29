@@ -1,27 +1,27 @@
 import { URL } from "url";
 import { Buffer } from "buffer";
-import { staff, phonebook } from "./routers/index.js";
+import { StaffRouter, PhonebookRouter, MessageRouter } from "./routers/index.js";
 import { auth } from "./middleware.js";
+import { getEnvironmentVariable } from "./get-environment-variable.js";
 
-export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedGroup, inboundNumber, outboundNumber }) {
-  const getMessagesUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Messages.json`;
+const ssoUrl = getEnvironmentVariable("SYNOLOGY_SSO_URL");
+const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
+const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
+const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
+const SYNOLOGY_ALLOWED_GROUP = getEnvironmentVariable("SYNOLOGY_ALLOWED_GROUP", "");
 
-  const getCallsUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Calls.json`;
+const TWILIO_ALLOWED_PHONE_NUMBER_INBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_INBOUND");
+const TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND");
 
-  const getMessageBySidUrl = messageSid => {
-    return `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Messages/${messageSid}.json`;
-  };
-
-  const getMessageMediaUrl = messageSid => {
-    return `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/Messages/${messageSid}/Media.json`;
-  };
+export function setRoutes(app) {
+  const getCallsUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`;
 
   // This is a stand-in for permissions based on the original fork's logic.
   // Should be replaced.
-  const getPhoneNumbersUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${accountSID}/IncomingPhoneNumbers.json`;
-
+  const getPhoneNumbersUrl = () =>
+    `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/IncomingPhoneNumbers.json`;
   const getAuthorizationHeader = () => {
-    return `Basic ${Buffer.from(`${token}:${secret}`).toString("base64")}`;
+    return `Basic ${Buffer.from(`${TWILIO_API_TOKEN}:${TWILIO_API_SECRET}`).toString("base64")}`;
   };
 
   app.get("/health", (req, res) => {
@@ -29,101 +29,6 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
       status: "healthy",
       timestamp: new Date().toISOString(),
     });
-  });
-
-  app.get("/messages", auth, async (req, res) => {
-    const { from, to, filter } = req.query;
-
-    console.log("Fetching messages with params:", { from, to, filter });
-    try {
-      const requests = [];
-      if (filter) {
-        if (filter === "all" || filter === "received") {
-          requests.push(
-            fetch(
-              `${getMessagesUrl()}?${new URLSearchParams({
-                To: inboundNumber,
-              }).toString()}`,
-              {
-                headers: {
-                  Authorization: getAuthorizationHeader(),
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-              },
-            ),
-          );
-        }
-
-        if (filter === "all" || filter === "sent") {
-          requests.push(
-            fetch(
-              `${getMessagesUrl()}?${new URLSearchParams({
-                From: inboundNumber,
-              }).toString()}`,
-              {
-                headers: {
-                  Authorization: getAuthorizationHeader(),
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-              },
-            ),
-          );
-        }
-      } else {
-        if (from) {
-          requests.push(
-            fetch(
-              `${getMessagesUrl()}?${new URLSearchParams({
-                From: from,
-                To: inboundNumber,
-              }).toString()}`,
-              {
-                headers: {
-                  Authorization: getAuthorizationHeader(),
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-              },
-            ),
-          );
-        }
-
-        if (to) {
-          requests.push(
-            fetch(
-              `${getMessagesUrl()}?${new URLSearchParams({
-                To: to,
-                From: inboundNumber,
-              }).toString()}`,
-              {
-                headers: {
-                  Authorization: getAuthorizationHeader(),
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-              },
-            ),
-          );
-        }
-      }
-
-      const responses = await Promise.all(requests);
-      const messages = [];
-      for (const response of responses) {
-        if (response.status === 403) {
-          return res.status(403).send("Forbidden: Not authenticated");
-        }
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch messages: ${response.statusText}`);
-        }
-        const data = await response.json();
-        messages.push(...data.messages);
-      }
-
-      res.status(200).json({ messages });
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      res.status(500).send("Internal Server Error");
-    }
   });
 
   app.get("/calls", auth, async (req, res) => {
@@ -137,7 +42,7 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
           requests.push(
             fetch(
               `${getCallsUrl()}?${new URLSearchParams({
-                To: inboundNumber,
+                To: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
               }).toString()}`,
               {
                 headers: {
@@ -153,7 +58,7 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
           requests.push(
             fetch(
               `${getCallsUrl()}?${new URLSearchParams({
-                From: inboundNumber,
+                From: TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
               }).toString()}`,
               {
                 headers: {
@@ -196,88 +101,6 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
     }
   });
 
-  app.post("/messages", auth, async (req, res) => {
-    const { to, body } = req.body;
-    if (!to || !body) {
-      return res.status(400).send("Bad Request: Missing To or Body");
-    }
-
-    console.debug("Sending message:", { to, body });
-    console.debug("Using outbound number:", outboundNumber);
-    try {
-      const response = await fetch(
-        `${getMessagesUrl()}?${new URLSearchParams({
-          To: to,
-          From: outboundNumber,
-          Body: body,
-        })}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: getAuthorizationHeader(),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        },
-      );
-
-      if (response.statusCode === 403) {
-        return res.status(403).send("Forbidden: Not authenticated");
-      }
-
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.statusText}`);
-      }
-
-      res.status(200).json(await response.json());
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      res.status(500).send("Internal Server Error");
-    }
-  });
-
-  app.get("/messages/:messageSid/media", auth, async (req, res) => {
-    const messageSid = req.params.messageSid;
-    if (!messageSid) {
-      return res.status(400).send("Bad Request: Missing message SID");
-    }
-
-    try {
-      const url = getMessageMediaUrl(messageSid);
-      const response = await fetch(url, {
-        headers: {
-          Authorization: getAuthorizationHeader(),
-        },
-      });
-
-      res.status(200).json(await response.json());
-    } catch (error) {
-      console.error("Error fetching media:", error);
-      res.status(500).send("Internal Server Error");
-    }
-  });
-
-  app.get("/messages/:messageSid", auth, async (req, res) => {
-    const messageSid = req.params.messageSid;
-    if (!messageSid) {
-      return res.status(400).send("Bad Request: Missing message SID");
-    }
-
-    try {
-      const url = getMessageBySidUrl(messageSid);
-      console.log("Fetching message by SID:", url);
-      const response = await fetch(url, {
-        headers: {
-          Authorization: getAuthorizationHeader(),
-        },
-      });
-
-      res.status(200).json(await response.json());
-    } catch (error) {
-      console.error("Error fetching message:", error);
-      res.status(500).send("Internal Server Error");
-    }
-  });
-
   app.get("/phone-numbers", auth, async (req, res) => {
     try {
       const response = await fetch(getPhoneNumbersUrl(), {
@@ -303,7 +126,7 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
 
       if (data.incoming_phone_numbers) {
         filteredPhoneNumbers = data.incoming_phone_numbers.filter(details => {
-          return details.phone_number === outboundNumber;
+          return details.phone_number === TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND;
         });
       }
 
@@ -332,8 +155,18 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
     res.status(200).send("OK");
   });
 
-  app.use("/staff", staff);
-  app.use("/phonebook", phonebook);
+  app.use(
+    "/messages",
+    MessageRouter(
+      TWILIO_ACCOUNT_SID,
+      TWILIO_API_TOKEN,
+      TWILIO_API_SECRET,
+      TWILIO_ALLOWED_PHONE_NUMBER_INBOUND,
+      TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND,
+    ),
+  );
+  app.use("/staff", StaffRouter());
+  app.use("/phonebook", PhonebookRouter());
   app.use("/session-token", auth);
 
   app.get("/session-token", async (req, res) => {
@@ -376,17 +209,16 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
 
       const { synotoken, sid, account } = parsed.data;
 
-      if (allowedGroup) {
+      if (SYNOLOGY_ALLOWED_GROUP) {
         const groupCheckUrl = new URL("/webapi/entry.cgi", ssoUrl);
         groupCheckUrl.searchParams.append("api", "SYNO.Core.Group.Member");
         groupCheckUrl.searchParams.append("version", "1");
         groupCheckUrl.searchParams.append("method", "list");
-        groupCheckUrl.searchParams.append("group", allowedGroup);
+        groupCheckUrl.searchParams.append("group", SYNOLOGY_ALLOWED_GROUP);
         groupCheckUrl.searchParams.append("SynoToken", synotoken);
         groupCheckUrl.searchParams.append("_sid", sid);
 
-        console.debug("Checking group membership for:", allowedGroup);
-
+        console.debug("Checking group membership for:", SYNOLOGY_ALLOWED_GROUP);
         const groupResponse = await fetch(groupCheckUrl.toString(), {
           headers: {
             Accept: "application/json",
@@ -407,7 +239,7 @@ export function setRoutes(app, { accountSID, token, secret }, { ssoUrl, allowedG
         const hasMembership = result.data.users.find(user => user.name === account);
 
         if (!hasMembership) {
-          console.error("User not in allowed group:", allowedGroup);
+          console.error("User not in allowed group:", SYNOLOGY_ALLOWED_GROUP);
           return res.status(403).json({ error: "Access denied: User not in allowed group" });
         }
       }

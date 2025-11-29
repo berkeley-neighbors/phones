@@ -1,27 +1,7 @@
-import express from "express";
-import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const SYNOLOGY_SSO_URL = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_SSO_APP_ID = getEnvironmentVariable("SYNOLOGY_SSO_APP_ID");
-
-export function addBaseStack(router, cookieSecret) {
-  router.use(express.urlencoded({ extended: true }));
-  router.use(express.json());
-  router.use(cookieParser(cookieSecret));
-
-  // Serve static files from dist in production
-  if (process.env.NODE_ENV === "production") {
-    const distPath = path.join(__dirname, "dist");
-    router.use(express.static(distPath));
-    console.log(`Serving static files from: ${distPath}`);
-  }
-}
 
 export function mongo(client, name) {
   const db = client.db(name);
