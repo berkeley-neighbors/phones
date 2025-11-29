@@ -2,19 +2,24 @@ import { URL } from "url";
 import { StaffRouter, PhonebookRouter, MessageRouter, ConfigRouter, CallsRouter } from "./routers/index.js";
 import { auth } from "./middleware.js";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
+import express from "express";
 
 const ssoUrl = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_ALLOWED_GROUP = getEnvironmentVariable("SYNOLOGY_ALLOWED_GROUP", "");
 
-export function setRoutes(app, db) {
-  app.get("/health", (req, res) => {
+export function setRoutes(app, basePath, db) {
+  const baseRouter = express.Router();
+
+  app.use(basePath || "/", baseRouter);
+
+  baseRouter.get("/health", (req, res) => {
     res.status(200).json({
       status: "healthy",
       timestamp: new Date().toISOString(),
     });
   });
 
-  app.post("/register", async (req, res) => {
+  baseRouter.post("/register", async (req, res) => {
     const { accessToken } = req.body;
 
     if (!accessToken) {
@@ -32,14 +37,14 @@ export function setRoutes(app, db) {
     res.status(200).send("OK");
   });
 
-  app.use("/messages", MessageRouter(db));
-  app.use("/staff", StaffRouter());
-  app.use("/phonebook", PhonebookRouter());
-  app.use("/config", ConfigRouter(db));
-  app.use("/session-token", auth);
-  app.use("/calls", CallsRouter(db));
+  baseRouter.use("/messages", MessageRouter(db));
+  baseRouter.use("/staff", StaffRouter());
+  baseRouter.use("/phonebook", PhonebookRouter());
+  baseRouter.use("/config", ConfigRouter(db));
+  baseRouter.use("/session-token", auth);
+  baseRouter.use("/calls", CallsRouter(db));
 
-  app.get("/session-token", async (req, res) => {
+  baseRouter.get("/session-token", async (req, res) => {
     const accessToken = req.signedCookies && req.signedCookies.accessToken;
     if (!accessToken) {
       return res.status(401).json({ error: "Unauthorized: No access token" });

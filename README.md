@@ -6,6 +6,14 @@ Web application to send and read SMS messages on behalf of Berkeley Neighbors.
 
 Originally forked from [twilio-sms-web](https://github.com/rafacandev/twilio-sms-web). License included with this repository.
 
+## Project structure
+
+* `src/` - Front-end application
+* `routers/` - Namespaced API routes
+* `clients/` - Clients to interact with internal/external "services"
+* `middleware.js` - Express-style middlewares
+* `server.js` - Main server entry point
+
 ## Please note
 
 This is alpha-level software customized to a specific org
@@ -82,10 +90,8 @@ Developers can change these values according to their needs via environment vari
 Sample `.env` file:
 
 ```
-REPLY_MESSAGE
 API_TOKEN
 ALLOWED_HOST
-TWILIO_ALLOWED_PHONE_NUMBER
 SYNOLOGY_SSO_URL
 SYNOLOGY_SSO_APP_ID
 COOKIE_SECRET

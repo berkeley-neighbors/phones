@@ -8,10 +8,10 @@ import { mongo } from "./middleware.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { API_DEVELOPMENT_PORT } from "./config.js";
 const app = express();
 
-const PORT = 4000;
-
+const PORT = getEnvironmentVariable("PORT", 3000);
 const COOKIE_SECRET = getEnvironmentVariable("COOKIE_SECRET");
 const MONGO_CONNECTION_STR = getEnvironmentVariable("MONGO_CONNECTION_STR", "mongodb://localhost:27017");
 const MONGO_DATABASE = getEnvironmentVariable("MONGO_DATABASE", "dispatch");
@@ -33,6 +33,7 @@ async function connectMongoDB() {
 
 // Start server with MongoDB initialization
 async function startServer() {
+  let applicationPort;
   const connectedClient = await connectMongoDB();
 
   process.on("SIGTERM", async () => {
@@ -59,16 +60,20 @@ async function startServer() {
     app.use(mongo(connectedClient, MONGO_DATABASE));
 
     const db = connectedClient.db(MONGO_DATABASE);
-    setRoutes(app, db);
 
     if (process.env.NODE_ENV === "production") {
       const distPath = path.join(__dirname, "dist");
       app.use(express.static(distPath));
       console.log(`Serving static files from: ${distPath}`);
+      setRoutes(app, "/api", db);
+      applicationPort = PORT;
+    } else {
+      setRoutes(app, "/", db);
+      applicationPort = API_DEVELOPMENT_PORT;
     }
 
-    app.listen(PORT, "0.0.0.0", () => {
-      console.debug(`API instance running on port ${PORT}`);
+    app.listen(applicationPort, "0.0.0.0", () => {
+      console.debug(`API instance running on port ${applicationPort}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

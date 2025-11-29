@@ -3,12 +3,15 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "tailwindcss";
 import { resolve } from "path";
 import { config } from "dotenv";
-
+import { getEnvironmentVariable } from "./get-environment-variable.js";
+import { API_DEVELOPMENT_PORT } from "./config.js";
 config();
 
 process.env.VITE_SYNOLOGY_SSO_APP_ID = process.env.SYNOLOGY_SSO_APP_ID;
 process.env.VITE_SYNOLOGY_SSO_URL = process.env.SYNOLOGY_SSO_URL;
 process.env.VITE_FOOTER_TEXT = process.env.FOOTER_TEXT;
+
+const PORT = getEnvironmentVariable("PORT", 3000);
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -17,10 +20,10 @@ export default defineConfig({
   server: {
     allowedHosts: [process.env.ALLOWED_HOST],
     host: "0.0.0.0",
-    port: 3000,
+    port: PORT,
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: `http://localhost:${API_DEVELOPMENT_PORT}`,
         rewrite: path => {
           return path.replace(/^\/api/, "");
         },
