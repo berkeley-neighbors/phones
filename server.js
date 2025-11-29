@@ -1,9 +1,10 @@
 import express from "express";
 import process from "process";
 import { MongoClient } from "mongodb";
-import { setMiddleware } from "./set-middleware.js";
 import { setRoutes } from "./set-routes.js";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
+import cookieParser from "cookie-parser";
+import { mongo } from "./middleware.js";
 const app = express();
 
 const PORT = 4000;
@@ -11,8 +12,6 @@ const PORT = 4000;
 const COOKIE_SECRET = getEnvironmentVariable("COOKIE_SECRET");
 const MONGO_CONNECTION_STR = getEnvironmentVariable("MONGO_CONNECTION_STR", "mongodb://localhost:27017");
 const MONGO_DATABASE = getEnvironmentVariable("MONGO_DATABASE", "dispatch");
-const TOKEN_EXCHANGE_ACTION = "exchange";
-const TOKEN_EXCHANGE_PATH = "/webman/sso/SSOAccessToken.cgi";
 const TWILIO_ALLOWED_PHONE_NUMBER_INBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_INBOUND");
 const TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND = getEnvironmentVariable("TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND");
 const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
@@ -56,7 +55,11 @@ async function startServer() {
   });
 
   try {
-    setMiddleware(app, COOKIE_SECRET);
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser(COOKIE_SECRET));
+
+    app.use(mongo(connectedClient, MONGO_DATABASE));
 
     const twilioOptions = {
       accountSID: TWILIO_ACCOUNT_SID,
@@ -65,8 +68,6 @@ async function startServer() {
     };
 
     const ssoOptions = {
-      exchangePath: TOKEN_EXCHANGE_PATH,
-      exchangeAction: TOKEN_EXCHANGE_ACTION,
       ssoUrl: SYNOLOGY_SSO_URL,
       ssoAppId: SYNOLOGY_SSO_APP_ID,
       allowedGroup: SYNOLOGY_ALLOWED_GROUP,
@@ -74,20 +75,7 @@ async function startServer() {
       outboundNumber: TWILIO_ALLOWED_PHONE_NUMBER_OUTBOUND,
     };
 
-    setRoutes(
-      app,
-      {
-        mongoClient: connectedClient,
-        options: {
-          databaseName: MONGO_DATABASE,
-          staffCollectionName: "staff",
-          threadCollectionName: "threads",
-          phoneBookCollectionName: "phonebook",
-        },
-      },
-      twilioOptions,
-      ssoOptions,
-    );
+    setRoutes(app, twilioOptions, ssoOptions);
 
     app.listen(PORT, "0.0.0.0", () => {
       console.debug(`API instance running on port ${PORT}`);
