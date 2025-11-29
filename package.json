@@ -6,13 +6,16 @@
   "homepage": "https://github.com/berkeley-neighbors/phones",
   "scripts": {
     "dev": "concurrently \"NODE_ENV=development vite\" \"node server.js\"",
-    "start": "concurrently \"NODE_ENV=production vite\" \"NODE_ENV=production node server.js\"",
+    "start": "NODE_ENV=production node server.js",
     "build": "vite build",
     "build:prod": "cp .env-prod .env && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "vite build",
     "format": "prettier . --write"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   },
   "dependencies": {
     "@ant-design/icons": "^4.8.3",

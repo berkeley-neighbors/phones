@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:24
 
 ENV ALLOWED_HOST="localhost"
 ENV TWILIO_ALLOWED_PHONE_NUMBER_INBOUND="your_twilio_allowed_phone_number_here"
@@ -18,7 +18,7 @@ COPY . ./
 
 RUN mkdir -p /data
 
-
 RUN npm install
+RUN npm run build
 
 CMD ["npm", "start"]
