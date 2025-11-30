@@ -155,7 +155,7 @@ export const CallsPage = () => {
   return (
     <Layout title="Call Logs">
       <div className="mb-4">
-        <sub>View call history</sub>
+        <p className="text-gray-600 mb-6">View call history</p>
       </div>
 
       <ErrorLabel error={error} className="mb-4" />

@@ -79,7 +79,7 @@ export const StaffPage = () => {
 
   return (
     <Layout title="Alert Staff">
-      <sub>Manage numbers that receive phone alerts</sub>
+      <p className="text-gray-600 mb-6">Manage numbers that receive phone alerts</p>
       <div className="staff-page__form">
         <form onSubmit={handleSubmit}>
           <div className="staff-page__form-group">

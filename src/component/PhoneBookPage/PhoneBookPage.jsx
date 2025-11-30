@@ -98,7 +98,7 @@ export const PhoneBookPage = () => {
     <Layout title="Phone Directory">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <sub>Public and safe to reference numbers</sub>
+          <p className="text-gray-600 mb-6">Public and safe to reference numbers</p>
         </div>
 
         <button className="staff-page__button" onClick={openAddModal}>

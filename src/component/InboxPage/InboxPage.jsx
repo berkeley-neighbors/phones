@@ -42,7 +42,7 @@ export const InboxPage = () => {
   return (
     <Layout title="Inbox">
       <div className="mb-4">
-        <sub>View and reply to text messages</sub>
+        <p className="text-gray-600 mb-6">View and reply to text messages</p>
       </div>
       <ErrorLabel error={error} className="mb-4" />
 

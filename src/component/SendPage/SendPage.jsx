@@ -59,7 +59,7 @@ export const SendPage = () => {
   return (
     <Layout title="Send">
       <div className="mb-4">
-        <sub>Text to any number</sub>
+        <p className="text-gray-600 mb-6">Text to any number</p>
       </div>
       <ErrorLabel error={error} className="mb-4" />
 
