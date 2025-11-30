@@ -49,37 +49,39 @@ const getStatusColor = status => {
   }
 };
 
-const CallIcon = ({ call }) =>
-  call.direction === "inbound" ? (
-    <PhoneOutlined className="block text-[1.2rem] text-purple-900 w-8" />
-  ) : (
-    <PhoneFilled className="block text-[1rem] text-purple-900 w-8" />
-  );
-
 const CallRow = ({ call }) => {
+  const isInbound = call.direction === "inbound";
+  const hasAnswer = call.duration && call.duration !== "0";
+
   return (
-    <div
-      key={call.sid}
-      className="flex bg-white border-b-2 border-l-2 pr-1 min-h-32 hover:bg-purple-100 hover:cursor-pointer hover:border-l-purple-400 active:bg-purple-200"
-    >
-      <div className="flex items-center justify-center">
-        <CallIcon call={call} />
+    <div key={call.sid} className="mb-4 cursor-pointer">
+      <div className="flex items-center justify-between mb-2 px-2">
+        <span className="font-semibold text-gray-800 truncate">{isInbound ? call.from : call.to}</span>
+        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{fromNow(call.date_created)}</span>
       </div>
-      <div className="grow">
-        <div className="text-gray-500 text-xs my-2 overflow-clip font-sans font-light">
-          <span className="inline-block w-32">
-            <b>To:</b> {call.to}
-          </span>
-          <span className="inline-block w-36">
-            <b>From:</b> {call.from}
-          </span>
-          <span className="hidden md:inline-block">
-            {call.direction} {fromNow(call.date_created)}
-          </span>
-        </div>
-        <div className="mb-2">
-          <span className={`font-medium ${getStatusColor(call.status)}`}>{call.status}</span>
-          <span className="text-gray-600"> • Duration: {formatDuration(call.duration)}</span>
+      <div className={`flex ${isInbound ? "justify-start" : "justify-end"}`}>
+        <div className={`max-w-[85%] min-w-0 ${isInbound ? "" : "flex flex-col items-end"}`}>
+          <div
+            className={`px-4 py-3 rounded-lg overflow-hidden ${
+              isInbound
+                ? hasAnswer
+                  ? "bg-white border border-gray-300 shadow-sm"
+                  : "bg-gray-100 border border-gray-300"
+                : hasAnswer
+                  ? "bg-violet-600 text-white shadow-sm"
+                  : "bg-violet-400 text-white opacity-90"
+            } hover:shadow-lg transition-shadow`}
+            style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+          >
+            <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
+              {isInbound ? <PhoneOutlined className="text-sm" /> : <PhoneFilled className="text-sm" />}
+              <span className="font-semibold">{isInbound ? "Incoming" : "Outgoing"} Call</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`font-medium ${getStatusColor(call.status)}`}>{call.status}</span>
+              <span className="text-sm">Duration: {formatDuration(call.duration)}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -100,7 +102,7 @@ const CallsList = ({ loading, calls }) => {
   }
 
   return (
-    <div className="border-2 border-b-0 border-l-0">
+    <div className="space-y-2">
       {calls.map(call => (
         <CallRow key={call.sid} call={call} />
       ))}
