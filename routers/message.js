@@ -131,12 +131,15 @@ export function Router(db) {
     try {
       const config = await configClient.getValuesByKeys("outbound_number");
 
-      console.debug("Sending message:", { to, body });
+      // Convert escaped newlines to actual newlines
+      const processedBody = body.replace(/\\n/g, "\n");
+
+      console.debug("Sending message:", { to, body: processedBody });
       const response = await fetch(
         `${getMessagesUrl()}?${new URLSearchParams({
           To: to,
           From: config.get("outbound_number"),
-          Body: body,
+          Body: processedBody,
         })}`,
         {
           method: "POST",

@@ -52,7 +52,9 @@ export const MessageInfo = ({ message }) => (
         <b>Attachments:</b> {message.media}
       </span>
     </div>
-    <div style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{message.body}</div>
+    <div className="whitespace-pre-wrap" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+      {message.body}
+    </div>
     <div className="mt-2 flex justify-center flex-wrap">
       <MediaViewer messageSid={message.messageSid} />
     </div>
