@@ -91,30 +91,38 @@ const MessageRow = (message, onClick) => {
  */
 const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick }) => {
   const hasUnread = !isRead(latestMessage);
+  const isReceived = latestMessage.direction === MessageDirection.received;
 
   return (
-    <div
-      key={phoneNumber}
-      onClick={onClick}
-      className={`flex
-  ${isReadContent(latestMessage)}
-  border-b-2 border-l-2 pr-1 min-h-32
-  hover:bg-purple-100 hover:cursor-pointer hover:border-l-purple-400
-  active:bg-purple-200`}
-    >
-      <div className="flex items-center justify-center">
-        <MessageIcon message={latestMessage} />
+    <div key={phoneNumber} onClick={onClick} className="mb-4 cursor-pointer">
+      <div className="flex items-center justify-between mb-2 px-2">
+        <span className="font-semibold text-gray-800">{phoneNumber}</span>
+        <span className="text-xs text-gray-500">{fromNow(latestMessage.date)}</span>
       </div>
-      <div className="grow">
-        <div className={`${isReadHeader(latestMessage)} text-xs my-2 overflow-clip font-sans font-light`}>
-          <span className="inline-block w-48">
-            <b>{phoneNumber}</b>
-          </span>
-          <span className="hidden md:inline-block">{fromNow(latestMessage.date)}</span>
-        </div>
-        <div className="line-clamp-3">{messageBody(latestMessage)}</div>
-        <div className="mt-2 text-sm text-violet-700 font-semibold">
-          {messageCount} {messageCount === 1 ? "message" : "messages"}
+      <div className={`flex ${isReceived ? "justify-start" : "justify-end"}`}>
+        <div className={`max-w-[85%] ${isReceived ? "" : "flex flex-col items-end"}`}>
+          <div
+            className={`px-4 py-3 rounded-lg ${
+              hasUnread
+                ? isReceived
+                  ? "bg-white border-2 border-violet-500 shadow-md"
+                  : "bg-violet-700 text-white shadow-md"
+                : isReceived
+                  ? "bg-gray-100 border border-gray-300"
+                  : "bg-violet-500 text-white opacity-90"
+            } hover:shadow-lg transition-shadow`}
+          >
+            <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
+              {isReceived ? <InboxOutlined className="text-sm" /> : <SendOutlined className="text-sm" />}
+              <span className={hasUnread ? "font-semibold" : ""}>
+                {messageCount} {messageCount === 1 ? "message" : "messages"}
+              </span>
+            </div>
+            <div className={`line-clamp-2 ${hasUnread && isReceived ? "font-medium text-gray-900" : ""}`}>
+              {messageBody(latestMessage)}
+            </div>
+            {latestMessage.media > 0 && <div className="mt-2 text-xs opacity-75">📎 Has attachments</div>}
+          </div>
         </div>
       </div>
     </div>
@@ -153,7 +161,7 @@ export const MessageRows = ({ loading = true, messages = [] }) => {
   });
 
   return (
-    <div className="border-2 border-b-0 border-l-0">
+    <div className="space-y-2">
       {sortedGroups.map(([phoneNumber, groupMessages]) => (
         <ConversationCard
           key={phoneNumber}
