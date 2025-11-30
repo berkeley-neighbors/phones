@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { PhoneOutlined, PhoneFilled, LoadingOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "../Layout/Layout";
 import { ErrorLabel } from "../ErrorLabel/ErrorLabel";
 import { APIContext } from "@/context/APIContext";
@@ -49,12 +50,12 @@ const getStatusColor = status => {
   }
 };
 
-const CallRow = ({ call }) => {
+const CallRow = ({ call, onClick }) => {
   const isInbound = call.direction === "inbound";
   const hasAnswer = call.duration && call.duration !== "0";
 
   return (
-    <div key={call.sid} className="mb-4 cursor-pointer">
+    <div key={call.sid} className="mb-4 cursor-pointer" onClick={() => onClick(call.sid)}>
       <div className="flex items-center justify-between mb-2 px-2">
         <span className="font-semibold text-gray-800 truncate">{isInbound ? call.from : call.to}</span>
         <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{fromNow(call.date_created)}</span>
@@ -88,7 +89,7 @@ const CallRow = ({ call }) => {
   );
 };
 
-const CallsList = ({ loading, calls }) => {
+const CallsList = ({ loading, calls, onCallClick }) => {
   if (loading) {
     return (
       <div className="text-center mt-16">
@@ -104,7 +105,7 @@ const CallsList = ({ loading, calls }) => {
   return (
     <div className="space-y-2">
       {calls.map(call => (
-        <CallRow key={call.sid} call={call} />
+        <CallRow key={call.sid} call={call} onClick={onCallClick} />
       ))}
     </div>
   );
@@ -112,10 +113,15 @@ const CallsList = ({ loading, calls }) => {
 
 export const CallsPage = () => {
   const api = useContext(APIContext);
+  const navigate = useNavigate();
   const [calls, setCalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [callFilter, setCallFilter] = useState(CallFilterEnum.received);
   const [error, setError] = useState(null);
+
+  const handleCallClick = callSid => {
+    navigate(`/call/${callSid}`);
+  };
 
   useEffect(() => {
     const fetchCalls = async () => {
@@ -155,7 +161,7 @@ export const CallsPage = () => {
       <ErrorLabel error={error} className="mb-4" />
 
       <CallFilter onChange={setCallFilter} />
-      <CallsList loading={loading} calls={calls} />
+      <CallsList loading={loading} calls={calls} onCallClick={handleCallClick} />
     </Layout>
   );
 };
