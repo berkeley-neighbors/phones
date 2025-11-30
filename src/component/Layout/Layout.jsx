@@ -50,30 +50,30 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="flex justify-between text-white px-1 sm:px-4">
+      <nav className="flex justify-between text-white px-1">
         <div className="flex">
           <NavItem onClick={navigateToInbox}>
-            <InboxOutlined className="text-lg" />
+            <InboxOutlined className="text-sm" />
             <span className="mt-1">Inbox</span>
           </NavItem>
           <NavItem onClick={navigateToSend}>
-            <SendOutlined className="text-lg" />
+            <SendOutlined className="text-sm" />
             <span className="mt-1">Send</span>
           </NavItem>
           <NavItem onClick={navigateToCalls}>
-            <PhoneOutlined className="text-lg" />
+            <PhoneOutlined className="text-sm" />
             <span className="mt-1">Calls</span>
           </NavItem>
           <NavItem onClick={navigateToStaff}>
-            <TeamOutlined className="text-lg" />
+            <TeamOutlined className="text-sm" />
             <span className="mt-1">Staff</span>
           </NavItem>
           <NavItem onClick={navigateToPhoneBook}>
-            <BookOutlined className="text-lg" />
+            <BookOutlined className="text-sm" />
             <span className="mt-1">Directory</span>
           </NavItem>
           <NavItem onClick={navigateToConfig}>
-            <SettingOutlined className="text-lg" />
+            <SettingOutlined className="text-sm" />
             <span className="mt-1">Config</span>
           </NavItem>
         </div>
