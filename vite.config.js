@@ -10,6 +10,7 @@ config();
 process.env.VITE_SYNOLOGY_SSO_APP_ID = process.env.SYNOLOGY_SSO_APP_ID;
 process.env.VITE_SYNOLOGY_SSO_URL = process.env.SYNOLOGY_SSO_URL;
 process.env.VITE_FOOTER_TEXT = process.env.FOOTER_TEXT;
+process.env.VITE_DRAWER_TEXT = process.env.DRAWER_TEXT;
 
 const PORT = getEnvironmentVariable("PORT", 3000);
 

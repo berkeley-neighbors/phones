@@ -95,10 +95,9 @@ export const PhoneBookPage = () => {
   };
 
   return (
-    <Layout>
+    <Layout title="Phone Directory">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="m-0">Phone Directory</h3>
           <sub>Public and safe to reference numbers</sub>
         </div>
 

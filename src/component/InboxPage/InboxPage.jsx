@@ -40,8 +40,7 @@ export const InboxPage = () => {
   }, []);
 
   return (
-    <Layout>
-      <h3>Inbox</h3>
+    <Layout title="Inbox">
       <div className="mb-4">
         <sub>View and reply to text messages</sub>
       </div>

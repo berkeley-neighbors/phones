@@ -57,8 +57,7 @@ export const SendPage = () => {
   const hint = `Send a message from  ${from === "" ? "?" : from}  to  ${to === "" ? "?" : to}`;
 
   return (
-    <Layout>
-      <h3>Send</h3>
+    <Layout title="Send Message">
       <div className="mb-4">
         <sub>Text to any number</sub>
       </div>

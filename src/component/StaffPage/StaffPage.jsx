@@ -78,8 +78,7 @@ export const StaffPage = () => {
   };
 
   return (
-    <Layout>
-      <h3>Alert Staff</h3>
+    <Layout title="Alert Staff">
       <sub>Manage numbers that receive phone alerts</sub>
       <div className="staff-page__form">
         <form onSubmit={handleSubmit}>

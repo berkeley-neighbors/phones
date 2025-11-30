@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"
-import { Layout } from "../Layout/Layout"
-import { getTwilioMessage } from "../../js/getTwilioMessages"
-import { useNavigate, useParams } from "react-router-dom"
-import { MessageInfo } from "../MessageInfo/MessageInfo"
-import { LoadingOutlined } from "@ant-design/icons"
-import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
+import { useEffect, useState } from "react";
+import { Layout } from "../Layout/Layout";
+import { getTwilioMessage } from "../../js/getTwilioMessages";
+import { useNavigate, useParams } from "react-router-dom";
+import { MessageInfo } from "../MessageInfo/MessageInfo";
+import { LoadingOutlined } from "@ant-design/icons";
+import { ErrorLabel } from "../ErrorLabel/ErrorLabel";
 import { APIContext } from "@/context/APIContext";
 import { useContext } from "react";
 
@@ -18,10 +18,10 @@ import { useContext } from "react";
  * @param {Message} props.message
  */
 const MessagePanel = ({ message }) => {
-  const navigate = useNavigate()
-  const isReceived = message.direction === "received"
-  const isSent = message.direction === "sent"
-  const destination = isReceived ? message.from : message.to
+  const navigate = useNavigate();
+  const isReceived = message.direction === "received";
+  const isSent = message.direction === "sent";
+  const destination = isReceived ? message.from : message.to;
   return (
     <>
       <MessageInfo message={message} />
@@ -31,27 +31,26 @@ const MessagePanel = ({ message }) => {
         {isSent && <button onClick={() => navigate(`/send/${destination}`)}>New Message</button>}
       </div>
     </>
-  )
-}
+  );
+};
 
 export const MessagePage = () => {
-  const { messageSid } = useParams()
-  const [message, setMessage] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { messageSid } = useParams();
+  const [message, setMessage] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const api = useContext(APIContext);
-  
+
   useEffect(() => {
     getTwilioMessage(api, messageSid)
       .then(setMessage)
       .catch(setError)
-      .finally(() => setLoading(false))
-  }, [setMessage])
+      .finally(() => setLoading(false));
+  }, [setMessage]);
 
   return (
-    <Layout>
-      <h3>Message</h3>
+    <Layout title="Message">
       <ErrorLabel error={error} />
       <p className="my-4">More details for your message.</p>
       {loading && (
@@ -61,5 +60,5 @@ export const MessagePage = () => {
       )}
       {!loading && <MessagePanel message={message} />}
     </Layout>
-  )
-}
+  );
+};

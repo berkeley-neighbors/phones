@@ -57,8 +57,7 @@ export const ConfigPage = () => {
   };
 
   return (
-    <Layout>
-      <h3>Configuration</h3>
+    <Layout title="Configuration">
       <p className="text-gray-600 mb-6">
         Configure the inbound and outbound phone numbers used throughout the application.
       </p>

@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react"
-import { Layout } from "../Layout/Layout"
-import { getTwilioMessage } from "../../js/getTwilioMessages"
-import { useParams } from "react-router-dom"
-import { MessageInfo } from "../MessageInfo/MessageInfo"
-import { LoadingOutlined } from "@ant-design/icons"
-import { ErrorLabel } from "../ErrorLabel/ErrorLabel"
-import { CheckCircleFilled } from "@ant-design/icons"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react";
+import { Layout } from "../Layout/Layout";
+import { getTwilioMessage } from "../../js/getTwilioMessages";
+import { useParams } from "react-router-dom";
+import { MessageInfo } from "../MessageInfo/MessageInfo";
+import { LoadingOutlined } from "@ant-design/icons";
+import { ErrorLabel } from "../ErrorLabel/ErrorLabel";
+import { CheckCircleFilled } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { APIContext } from "@/context/APIContext";
 import { useContext } from "react";
 
@@ -20,9 +20,9 @@ import { useContext } from "react";
  * @param {Message} props.message
  */
 const MessagePanel = ({ message }) => {
-  const navigate = useNavigate()
-  const isReceived = message.direction === "received"
-  const destination = isReceived ? message.from : message.to
+  const navigate = useNavigate();
+  const isReceived = message.direction === "received";
+  const destination = isReceived ? message.from : message.to;
   return (
     <>
       <MessageInfo message={message} />
@@ -30,14 +30,14 @@ const MessagePanel = ({ message }) => {
         <button onClick={() => navigate(`/conversation/${destination}`)}>See Conversation</button>
       </div>
     </>
-  )
-}
+  );
+};
 
 export const SentPage = () => {
-  const { messageSid } = useParams()
-  const [message, setMessage] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { messageSid } = useParams();
+  const [message, setMessage] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const api = useContext(APIContext);
 
@@ -45,14 +45,17 @@ export const SentPage = () => {
     getTwilioMessage(api, messageSid)
       .then(setMessage)
       .catch(setError)
-      .finally(() => setLoading(false))
-  }, [messageSid, setMessage])
+      .finally(() => setLoading(false));
+  }, [messageSid, setMessage]);
 
   return (
-    <Layout>
-      <h3>
-        <CheckCircleFilled className="text-green-600" /> Message Sent
-      </h3>
+    <Layout
+      title={
+        <>
+          <CheckCircleFilled className="text-green-600" /> Message Sent
+        </>
+      }
+    >
       <ErrorLabel error={error} />
       <p className="my-4">Your message has been sent.</p>
       {loading && (
@@ -62,5 +65,5 @@ export const SentPage = () => {
       )}
       {!loading && <MessagePanel message={message} />}
     </Layout>
-  )
-}
+  );
+};

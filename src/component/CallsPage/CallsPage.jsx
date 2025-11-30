@@ -145,8 +145,7 @@ export const CallsPage = () => {
   }, [api, callFilter]);
 
   return (
-    <Layout>
-      <h3>Call Logs</h3>
+    <Layout title="Call Logs">
       <div className="mb-4">
         <sub>View call history</sub>
       </div>
