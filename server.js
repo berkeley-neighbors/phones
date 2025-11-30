@@ -66,6 +66,11 @@ async function startServer() {
       app.use(express.static(distPath));
       console.log(`Serving static files from: ${distPath}`);
       setRoutes(app, "/api", db);
+
+      app.get("/{*splat}", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+
       applicationPort = PORT;
     } else {
       setRoutes(app, "/", db);
