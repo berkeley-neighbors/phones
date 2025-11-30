@@ -107,18 +107,28 @@ export const ConversationPage = () => {
     try {
       const messageSid = await sendTwilioMessage(api, number, newMessage);
 
-      // Remove optimistic message and add real one once we got it
-      setOptimisticMessages(prev => prev.filter(m => m.messageSid !== optimisticId));
-
-      // Refresh messages for now
+      // Refresh messages
       const ft = getTwilioMessages(api, { to: number });
       const tf = getTwilioMessages(api, { from: number });
       const msg = await Promise.all([ft, tf]);
-      setMessages(msg.flat().sort(sortByDate));
+      const newMessages = msg.flat().sort(sortByDate);
+
+      // Remove optimistic message once we can confirm a real message exists
+      const realMessageExists = newMessages.some(m => m.messageSid === messageSid);
+      if (realMessageExists) {
+        setOptimisticMessages(prev => prev.filter(m => m.messageSid !== optimisticId));
+        setMessages(newMessages);
+      } else {
+        // Mark it as sent
+        setOptimisticMessages(prev =>
+          prev.map(m => (m.messageSid === optimisticId ? { ...m, isOptimistic: false, messageSid } : m)),
+        );
+        setMessages(newMessages);
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
 
-      // It died
+      // Dead
       setFailedMessages(prev => new Set([...prev, optimisticId]));
     } finally {
       setSending(false);
@@ -132,7 +142,12 @@ export const ConversationPage = () => {
     }
   };
 
-  const allMessages = [...messages, ...optimisticMessages].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const allMessages = [...messages, ...optimisticMessages].sort((a, b) => {
+    // Optimistic messages always go to the bottom
+    if (a.isOptimistic && !b.isOptimistic) return 1;
+    if (!a.isOptimistic && b.isOptimistic) return -1;
+    return new Date(a.date) - new Date(b.date);
+  });
 
   if (loading) {
     return (
