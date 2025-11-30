@@ -13,6 +13,7 @@ import { SentPage } from "./component/SentPage/SentPage";
 import { StaffPage } from "./component/StaffPage/StaffPage";
 import { CallsPage } from "./component/CallsPage/CallsPage";
 import { PhoneBookPage } from "./component/PhoneBookPage/PhoneBookPage";
+import { RunbookPage } from "./component/RunbookPage/RunbookPage";
 import { ConfigPage } from "./component/ConfigPage/ConfigPage";
 import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage";
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage";
@@ -71,6 +72,7 @@ export const App = () => {
                 <Route path="/staff" element={<StaffPage />} />
                 <Route path="/calls" element={<CallsPage />} />
                 <Route path="/phonebook" element={<PhoneBookPage />} />
+                <Route path="/runbook" element={<RunbookPage />} />
                 <Route path="/config" element={<ConfigPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
