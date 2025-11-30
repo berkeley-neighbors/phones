@@ -96,13 +96,13 @@ const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick })
   return (
     <div key={phoneNumber} onClick={onClick} className="mb-4 cursor-pointer">
       <div className="flex items-center justify-between mb-2 px-2">
-        <span className="font-semibold text-gray-800">{phoneNumber}</span>
-        <span className="text-xs text-gray-500">{fromNow(latestMessage.date)}</span>
+        <span className="font-semibold text-gray-800 truncate">{phoneNumber}</span>
+        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{fromNow(latestMessage.date)}</span>
       </div>
       <div className={`flex ${isReceived ? "justify-start" : "justify-end"}`}>
-        <div className={`max-w-[85%] ${isReceived ? "" : "flex flex-col items-end"}`}>
+        <div className={`max-w-[85%] min-w-0 ${isReceived ? "" : "flex flex-col items-end"}`}>
           <div
-            className={`px-4 py-3 rounded-lg ${
+            className={`px-4 py-3 rounded-lg break-words overflow-hidden ${
               hasUnread
                 ? isReceived
                   ? "bg-white border-2 border-violet-500 shadow-md"
@@ -111,6 +111,7 @@ const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick })
                   ? "bg-gray-100 border border-gray-300"
                   : "bg-violet-500 text-white opacity-90"
             } hover:shadow-lg transition-shadow`}
+            style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
           >
             <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
               {isReceived ? <InboxOutlined className="text-sm" /> : <SendOutlined className="text-sm" />}
@@ -118,7 +119,10 @@ const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick })
                 {messageCount} {messageCount === 1 ? "message" : "messages"}
               </span>
             </div>
-            <div className={`line-clamp-2 ${hasUnread && isReceived ? "font-medium text-gray-900" : ""}`}>
+            <div
+              className={`line-clamp-2 ${hasUnread && isReceived ? "font-medium text-gray-900" : ""}`}
+              style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+            >
               {messageBody(latestMessage)}
             </div>
             {latestMessage.media > 0 && <div className="mt-2 text-xs opacity-75">📎 Has attachments</div>}

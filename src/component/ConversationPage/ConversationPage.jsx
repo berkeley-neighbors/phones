@@ -27,15 +27,16 @@ const MessageBubble = ({ message, hasError = false, isOptimistic = false }) => {
 
   return (
     <div className={`flex mb-4 ${isReceived ? "justify-start" : "justify-end"}`} onClick={handleClick}>
-      <div className={`max-w-[70%] ${isReceived ? "" : "flex flex-col items-end"}`}>
+      <div className={`max-w-[70%] min-w-0 ${isReceived ? "" : "flex flex-col items-end"}`}>
         <div
-          className={`px-4 py-3 rounded-lg ${!isOptimistic && !hasError ? "cursor-pointer" : ""} ${
+          className={`px-4 py-3 rounded-lg overflow-hidden ${!isOptimistic && !hasError ? "cursor-pointer" : ""} ${
             hasError
               ? "bg-red-100 border-2 border-red-500 text-red-900"
               : isReceived
                 ? "bg-white border border-gray-300 hover:bg-gray-50"
                 : `bg-violet-600 text-white ${!isOptimistic ? "hover:bg-violet-700" : "opacity-70"}`
           }`}
+          style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
         >
           <div className="flex items-center gap-2 mb-1 text-xs opacity-75">
             {hasError ? (
@@ -50,7 +51,9 @@ const MessageBubble = ({ message, hasError = false, isOptimistic = false }) => {
               </>
             )}
           </div>
-          <div className="whitespace-pre-wrap break-words">{messageBody(message)}</div>
+          <div className="whitespace-pre-wrap" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+            {messageBody(message)}
+          </div>
           {hasError && <div className="mt-2 text-xs font-semibold">Message failed to send. Please try again.</div>}
           {message.media > 0 && !isOptimistic && (
             <div className="mt-2">
