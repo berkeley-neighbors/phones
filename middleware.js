@@ -2,6 +2,7 @@ import { getEnvironmentVariable } from "./get-environment-variable.js";
 
 const SYNOLOGY_SSO_URL = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_SSO_APP_ID = getEnvironmentVariable("SYNOLOGY_SSO_APP_ID");
+const AUTH_METHOD = getEnvironmentVariable("AUTH_METHOD");
 
 export function mongo(client, name) {
   const db = client.db(name);
@@ -26,7 +27,7 @@ collection.read = function (req) {
   return req.collection;
 };
 
-export async function auth(req, res, next) {
+async function synologyAuth(req, res, next) {
   const tokenExchangeAction = "exchange";
   const tokenExchangePath = "/webman/sso/SSOAccessToken.cgi";
   const accessToken = req.signedCookies && req.signedCookies.accessToken;
@@ -70,4 +71,16 @@ export async function auth(req, res, next) {
   }
 
   next();
+}
+
+function noAuth(_, __, next) {
+  next();
+}
+
+export async function auth(req, res, next) {
+  if (AUTH_METHOD === "synology") {
+    return synologyAuth(req, res, next);
+  } else if (AUTH_METHOD === "none") {
+    return noAuth(req, res, next);
+  }
 }

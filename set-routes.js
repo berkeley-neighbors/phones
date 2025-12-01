@@ -6,6 +6,7 @@ import express from "express";
 
 const ssoUrl = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_ALLOWED_GROUP = getEnvironmentVariable("SYNOLOGY_ALLOWED_GROUP", "");
+const AUTH_METHOD = getEnvironmentVariable("AUTH_METHOD");
 
 export function setRoutes(app, basePath, db) {
   const baseRouter = express.Router();
@@ -41,10 +42,10 @@ export function setRoutes(app, basePath, db) {
   baseRouter.use("/staff", StaffRouter());
   baseRouter.use("/phonebook", PhonebookRouter());
   baseRouter.use("/config", ConfigRouter(db));
-  baseRouter.use("/session-token", auth);
   baseRouter.use("/calls", CallsRouter(db));
+  baseRouter.use("/session-token", auth);
 
-  baseRouter.get("/session-token", async (req, res) => {
+  async function getSynologySessionToken(req, res) {
     const accessToken = req.signedCookies && req.signedCookies.accessToken;
     if (!accessToken) {
       return res.status(401).json({ error: "Unauthorized: No access token" });
@@ -126,5 +127,17 @@ export function setRoutes(app, basePath, db) {
       console.error("Error authenticating with Synology:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
+  }
+
+  baseRouter.get("/session-token", async (req, res) => {
+    if (AUTH_METHOD == "none") {
+      return res.status(200).json({ token: "none" });
+    }
+
+    if (AUTH_METHOD == "synology") {
+      return getSynologySessionToken(req, res);
+    }
+
+    return res.status(500).json({ error: "Internal Server Error" });
   });
 }
