@@ -43,7 +43,7 @@ export const getTwilioMessages = async (api, { from = "", to = "", filter }) => 
   let messages = response.data.messages.map(toMessage).sort(sortByDate);
 
   messages.forEach(message => {
-    const matchingAnnotation = response.data.annotations?.[message.messageSid];
+    const matchingAnnotation = response.data.annotations?.find(a => a.sid === message.messageSid);
     if (matchingAnnotation) {
       message.annotation = matchingAnnotation;
     } else {

@@ -90,8 +90,22 @@ const MessageRow = (message, onClick) => {
  * Conversation card showing a phone number and message count
  */
 const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick }) => {
-  const hasUnread = !isRead(latestMessage);
   const isReceived = latestMessage.direction === MessageDirection.received;
+  const isSender = latestMessage.annotation;
+
+  let wrappingClasses = "bg-violet-500 text-white opacity-90";
+
+  if (isReceived) {
+    wrappingClasses = "bg-gray-100 border border-gray-300";
+  } else {
+    wrappingClasses = "text-white opacity-90";
+
+    if (isSender) {
+      wrappingClasses += " bg-amber-800 ";
+    } else {
+      wrappingClasses += " bg-violet-800 ";
+    }
+  }
 
   return (
     <div key={phoneNumber} onClick={onClick} className="mb-4 cursor-pointer">
@@ -102,27 +116,16 @@ const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick })
       <div className={`flex ${isReceived ? "justify-start" : "justify-end"}`}>
         <div className={`max-w-[85%] min-w-0 ${isReceived ? "" : "flex flex-col items-end"}`}>
           <div
-            className={`px-4 py-3 rounded-lg break-words overflow-hidden ${
-              hasUnread
-                ? isReceived
-                  ? "bg-white border-2 border-violet-500 shadow-md"
-                  : "bg-violet-700 text-white shadow-md"
-                : isReceived
-                  ? "bg-gray-100 border border-gray-300"
-                  : "bg-violet-500 text-white opacity-90"
-            } hover:shadow-lg transition-shadow`}
+            className={`px-4 py-3 rounded-lg break-words overflow-hidden ${wrappingClasses} hover:shadow-lg transition-shadow`}
             style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
           >
             <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
               {isReceived ? <InboxOutlined className="text-sm" /> : <SendOutlined className="text-sm" />}
-              <span className={hasUnread ? "font-semibold" : ""}>
+              <span>
                 {messageCount} {messageCount === 1 ? "message" : "messages"}
               </span>
             </div>
-            <div
-              className={`line-clamp-2 ${hasUnread && isReceived ? "font-medium text-gray-900" : ""}`}
-              style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-            >
+            <div className={`line-clamp-2`} style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
               {messageBody(latestMessage)}
             </div>
             {latestMessage.media > 0 && <div className="mt-2 text-xs opacity-75">📎 Has attachments</div>}
