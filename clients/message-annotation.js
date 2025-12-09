@@ -13,19 +13,19 @@ export class MessageAnnotationClient {
     return this.collection.insertOne({ _id: new ObjectId(), sid: messageSid, sender: uid }, { upsert: true });
   }
 
-  getAnnotationByMessageSid(messageSid) {
+  getAnnotationByMessageSid(uid, messageSid) {
     if (!messageSid) {
       throw new Error("messageSid is required to fetch an annotation");
     }
 
-    return this.collection.findOne({ sid: messageSid }, { sid: 1, sender: 1 });
+    return this.collection.findOne({ sender: uid, sid: messageSid }, { sid: 1, sender: 1 });
   }
 
-  getAnnotationsByMessageSids(messageSids) {
+  getAnnotationsByMessageSids(uid, messageSids) {
     if (!Array.isArray(messageSids)) {
       throw new Error("An array of messageSids is required to fetch annotations");
     }
 
-    return this.collection.find({ sid: { $in: messageSids } }, { sid: 1, sender: 1 }).toArray();
+    return this.collection.find({ sender: uid, sid: { $in: messageSids } }, { sid: 1, sender: 1 }).toArray();
   }
 }
