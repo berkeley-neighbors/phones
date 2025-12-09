@@ -3,6 +3,7 @@ import { auth } from "../middleware.js";
 import { Buffer } from "buffer";
 import { getEnvironmentVariable } from "../get-environment-variable.js";
 import { ConfigClient } from "../clients/config.js";
+import { MessageAnnotationClient } from "../clients/message-annotation.js";
 
 const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
 const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
@@ -11,6 +12,7 @@ const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
 export function Router(db) {
   const router = express.Router();
   const configClient = new ConfigClient(db);
+  const messageAnnotationClient = new MessageAnnotationClient(db);
 
   const getMessagesUrl = () => `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
   const getMessageBySidUrl = messageSid => {
@@ -115,7 +117,20 @@ export function Router(db) {
         messages.push(...data.messages);
       }
 
-      res.status(200).json({ messages });
+      let annotations = [];
+      try {
+        const messageSids = messages.map(msg => msg.sid);
+        annotations = await messageAnnotationClient.getAnnotationsByMessageSids(messageSids);
+
+        annotations = annotations.map(annotation => ({
+          sid: annotation.sid,
+          sender: annotation.sender,
+        }));
+      } catch (annotationError) {
+        console.error("Failed to fetch message annotations:", annotationError);
+      }
+
+      res.status(200).json({ messages, annotations });
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).send("Internal Server Error");
@@ -158,7 +173,16 @@ export function Router(db) {
         throw new Error(`Failed to send message: ${response.statusText}`);
       }
 
-      res.status(200).json(await response.json());
+      const parsed = await response.json();
+
+      res.status(200).json(parsed);
+
+      // Non-critical op
+      try {
+        messageAnnotationClient.insertAnnotation(req.uid, parsed.sid);
+      } catch (annotationError) {
+        console.error("Failed to insert message annotation:", annotationError);
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).send("Internal Server Error");
@@ -201,7 +225,16 @@ export function Router(db) {
         },
       });
 
-      res.status(200).json(await response.json());
+      const message = await response.json();
+      let annotation = null;
+
+      try {
+        annotation = await messageAnnotationClient.getAnnotationByMessageSid(messageSid);
+      } catch (annotationError) {
+        console.error("Failed to fetch message annotation:", annotationError);
+      }
+
+      res.status(200).json({ message, annotation });
     } catch (error) {
       console.error("Error fetching message:", error);
       res.status(500).send("Internal Server Error");

@@ -3,6 +3,7 @@ import { getEnvironmentVariable } from "./get-environment-variable.js";
 const SYNOLOGY_SSO_URL = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_SSO_APP_ID = getEnvironmentVariable("SYNOLOGY_SSO_APP_ID");
 const AUTH_METHOD = getEnvironmentVariable("AUTH_METHOD");
+const ANONYMOUS_UID = 1;
 
 export function mongo(client, name) {
   const db = client.db(name);
@@ -65,6 +66,11 @@ async function synologyAuth(req, res, next) {
       console.error("Token exchange failed:", data.error);
       return res.status(401).send("Unauthorized: Invalid access token");
     }
+
+    // Although redundant, move this lookup in explicit fetching path
+    if (data?.data?.user_id) {
+      req.uid = data.data.user_id;
+    }
   } catch (error) {
     console.error("Error parsing token exchange response:", error);
     return res.status(500).send("Internal Server Error");
@@ -73,7 +79,9 @@ async function synologyAuth(req, res, next) {
   next();
 }
 
-function noAuth(_, __, next) {
+function noAuth(req, __, next) {
+  req.uid = ANONYMOUS_UID;
+
   next();
 }
 

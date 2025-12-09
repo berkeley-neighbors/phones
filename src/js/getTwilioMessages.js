@@ -40,7 +40,18 @@ export const getTwilioMessages = async (api, { from = "", to = "", filter }) => 
     params,
   });
 
-  return response.data.messages.map(toMessage).sort(sortByDate);
+  let messages = response.data.messages.map(toMessage).sort(sortByDate);
+
+  messages.forEach(message => {
+    const matchingAnnotation = response.data.annotations?.[message.messageSid];
+    if (matchingAnnotation) {
+      message.annotation = matchingAnnotation;
+    } else {
+      message.annotation = null;
+    }
+  });
+
+  return messages;
 };
 
 /**
@@ -51,5 +62,9 @@ export const getTwilioMessage = async (api, messageSid = "") => {
 
   const response = await api.get(url);
 
-  return toMessage(response.data);
+  const message = toMessage(response.data.message);
+
+  message.annotation = response.data.annotation || null;
+
+  return message;
 };
