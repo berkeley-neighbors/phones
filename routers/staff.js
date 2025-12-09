@@ -11,7 +11,16 @@ export function Router() {
   router.get("/", async (req, res) => {
     try {
       const staffList = await collection.read(req).find({}).toArray();
-      res.status(200).json(staffList);
+      const strippedNumberStaffList = staffList.map(staff => {
+        const repeatCount = staff.phone_number.length - 4;
+        const maskLength = repeatCount > 0 ? repeatCount : 0;
+
+        return {
+          ...staff,
+          phone_number: `${"*".repeat(maskLength)}${staff.phone_number.slice(-4)}`,
+        };
+      });
+      res.status(200).json(strippedNumberStaffList);
     } catch (error) {
       console.error("Error retrieving staff:", error);
       res.status(500).json({ error: "Failed to retrieve staff" });

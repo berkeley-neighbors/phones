@@ -120,7 +120,7 @@ export function Router(db) {
       let annotations = [];
       try {
         const messageSids = messages.map(msg => msg.sid);
-        annotations = await messageAnnotationClient.getAnnotationsByMessageSids(messageSids);
+        annotations = await messageAnnotationClient.getAnnotationsByMessageSids(req.uid, messageSids);
 
         annotations = annotations.map(annotation => ({
           sid: annotation.sid,
@@ -229,7 +229,7 @@ export function Router(db) {
       let annotation = null;
 
       try {
-        annotation = await messageAnnotationClient.getAnnotationByMessageSid(messageSid);
+        annotation = await messageAnnotationClient.getAnnotationByMessageSid(req.uid, messageSid);
       } catch (annotationError) {
         console.error("Failed to fetch message annotation:", annotationError);
       }
