@@ -50,23 +50,39 @@ export class ScheduleClient {
       throw new Error("Please link your phone number first");
     }
 
-    if (!data.start_time || !data.end_time || !data.date) {
-      throw new Error("start_time, end_time, and date are required");
+    const isAlways = data.always || false;
+
+    if (!isAlways) {
+      if (!data.start_time || !data.end_time || !data.date) {
+        throw new Error("start_time, end_time, and date are required");
+      }
+
+      if (data.start_time >= data.end_time) {
+        throw new Error("End time must be after start time");
+      }
     }
 
-    if (data.start_time >= data.end_time) {
-      throw new Error("End time must be after start time");
+    if (isAlways) {
+      const existing = await this.scheduleCollection.findOne({
+        uid,
+        always: true,
+      });
+
+      if (existing) {
+        throw new Error("Already marked as always on-call");
+      }
     }
 
     const schedule = {
       _id: new ObjectId(),
       uid,
       phone_number: profile.phone_number,
-      start_time: data.start_time,
-      end_time: data.end_time,
-      day_of_week: data.day_of_week,
-      recurring: data.recurring || false,
-      date: data.date,
+      start_time: isAlways ? "00:00" : data.start_time,
+      end_time: isAlways ? "23:59" : data.end_time,
+      day_of_week: data.day_of_week ?? null,
+      recurring: false,
+      always: isAlways,
+      date: data.date || new Date().toISOString().split("T")[0],
       created_at: new Date(),
     };
 

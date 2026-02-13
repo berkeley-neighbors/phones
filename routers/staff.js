@@ -3,9 +3,11 @@ import express from "express";
 import { ObjectId } from "mongodb";
 import { collection, auth } from "../middleware.js";
 import { ScheduleClient } from "../clients/schedule.js";
+import { NotificationClient } from "../clients/notification.js";
 
 export function Router(db) {
   const scheduleClient = new ScheduleClient(db);
+  const notificationClient = new NotificationClient(db);
   const router = express.Router();
 
   router.use(auth);
@@ -54,6 +56,10 @@ export function Router(db) {
 
       await req.collection.insertOne(newStaff);
       res.status(201).json(newStaff);
+
+      notificationClient
+        .sendSMS(phone_number, "You have been added to the on-call staff list and are currently active.")
+        .catch(err => console.error("Failed to send add notification:", err));
     } catch (error) {
       console.error("Error adding staff:", error);
       res.status(500).json({ error: "Failed to add staff" });
@@ -74,17 +80,24 @@ export function Router(db) {
         return res.status(400).json({ error: "Active must be a boolean value" });
       }
 
-      const result = await collection.read(req).updateOne({ id }, { $set: { active } });
+      const staff = await collection.read(req).findOne({ id });
 
-      if (result.matchedCount === 0) {
+      if (!staff) {
         return res.status(404).json({ error: "Staff member not found" });
       }
+
+      await collection.read(req).updateOne({ id }, { $set: { active } });
 
       res.status(200).json({
         message: "Staff member updated successfully",
         id,
         active,
       });
+
+      const statusLabel = active ? "activated" : "deactivated";
+      notificationClient
+        .sendSMS(staff.phone_number, `You have been ${statusLabel} on the on-call staff list.`)
+        .catch(err => console.error("Failed to send status notification:", err));
     } catch (error) {
       console.error("Error updating staff:", error);
       res.status(500).json({ error: "Failed to update staff" });

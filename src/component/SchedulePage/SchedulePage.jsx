@@ -44,6 +44,9 @@ function getEventsForDate(date, schedules) {
   const dateStr = date.format("YYYY-MM-DD");
 
   return schedules.filter(s => {
+    if (s.always) {
+      return true;
+    }
     if (s.recurring && s.day_of_week === dayOfWeek && dateStr >= s.date) {
       return true;
     }
@@ -147,6 +150,9 @@ export const SchedulePage = () => {
       addNotification("Please link your phone number first", "error");
       return;
     }
+    if (date.format("YYYY-MM-DD") < today) {
+      return;
+    }
     setSelectedDate(date);
     setStartTime("09:00");
     setEndTime("17:00");
@@ -231,9 +237,45 @@ export const SchedulePage = () => {
           <span>
             Your number: <strong>{maskPhone(profile.phone_number)}</strong>
           </span>
-          <button onClick={handleUnlinkProfile} className="text-red-600 hover:text-red-800 text-xs">
-            Unlink
-          </button>
+          <div className="flex items-center gap-3">
+            {schedules.some(s => s.always && s.uid === profile.uid) ? (
+              <button
+                onClick={async () => {
+                  const entry = schedules.find(s => s.always && s.uid === profile.uid);
+                  if (entry && window.confirm("Remove always on-call status?")) {
+                    try {
+                      await api.delete(`/api/schedules/${entry._id}`);
+                      addNotification("Always on-call removed", "success");
+                      await loadSchedules();
+                    } catch (error) {
+                      addNotification(error.response?.data?.error || error.message, "error");
+                    }
+                  }
+                }}
+                className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded border border-green-300 hover:bg-green-200"
+              >
+                ✓ Always on-call
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  try {
+                    await api.post("/api/schedules", { always: true });
+                    addNotification("Marked as always on-call", "success");
+                    await loadSchedules();
+                  } catch (error) {
+                    addNotification(error.response?.data?.error || error.message, "error");
+                  }
+                }}
+                className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
+              >
+                Always on-call
+              </button>
+            )}
+            <button onClick={handleUnlinkProfile} className="text-neutral-100 hover:text-neutral-200 text-xs">
+              Unlink
+            </button>
+          </div>
         </div>
       )}
 
@@ -241,14 +283,14 @@ export const SchedulePage = () => {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentMonth(currentMonth.subtract(1, "month"))}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-lg"
+          className="px-3 py-1 bg-200 rounded hover:bg-300 text-lg"
         >
           ‹
         </button>
         <h2 className="text-lg font-semibold">{currentMonth.format("MMMM YYYY")}</h2>
         <button
           onClick={() => setCurrentMonth(currentMonth.add(1, "month"))}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-lg"
+          className="px-3 py-1 bg-200 rounded hover:bg-300 text-lg"
         >
           ›
         </button>
@@ -281,20 +323,23 @@ export const SchedulePage = () => {
               }
 
               const dateStr = date.format("YYYY-MM-DD");
-              const events = getEventsForDate(date, schedules);
               const isToday = dateStr === today;
+              const isPast = dateStr < today;
+              const events = isPast
+                ? getEventsForDate(date, schedules).filter(s => !s.always)
+                : getEventsForDate(date, schedules);
               const isSelected = selectedDate && dateStr === selectedDate.format("YYYY-MM-DD");
 
               return (
                 <div
                   key={dateStr}
                   onClick={() => handleDayClick(date)}
-                  className={`calendar-cell border-b border-r border-gray-200 cursor-pointer hover:bg-violet-50 transition-colors ${
-                    isToday ? "bg-violet-100" : ""
-                  } ${isSelected ? "ring-2 ring-violet-500 ring-inset" : ""}`}
+                  className={`calendar-cell border-b border-r border-gray-200 transition-colors ${
+                    isPast ? "bg-gray-100 opacity-60" : "cursor-pointer hover:bg-violet-50"
+                  } ${isToday ? "bg-violet-100" : ""} ${isSelected ? "ring-2 ring-violet-500 ring-inset" : ""}`}
                 >
                   <div
-                    className={`text-xs font-medium mb-1 ${isToday ? "text-violet-700 font-bold" : "text-gray-700"}`}
+                    className={`text-xs font-medium mb-1 ${isPast ? "text-gray-400" : isToday ? "text-violet-700 font-bold" : "text-gray-700"}`}
                   >
                     {date.date()}
                   </div>
@@ -305,9 +350,9 @@ export const SchedulePage = () => {
                         <div
                           key={evt._id}
                           className={`text-[10px] leading-tight px-1 rounded truncate ${color.bg} ${color.text}`}
-                          title={`${evt.start_time}–${evt.end_time} ${maskPhone(evt.phone_number)}${evt.recurring ? " (recurring)" : ""}`}
+                          title={`${evt.always ? "Always on-call" : `${evt.start_time}–${evt.end_time}`} ${maskPhone(evt.phone_number)}${evt.recurring ? " (recurring)" : ""}${evt.always ? " (always)" : ""}`}
                         >
-                          {evt.start_time}–{evt.end_time}
+                          {evt.always ? "Always" : `${evt.start_time}–${evt.end_time}`}
                         </div>
                       );
                     })}
@@ -344,15 +389,16 @@ export const SchedulePage = () => {
                           className={`flex items-center justify-between rounded px-3 py-2 text-sm border ${color.bg} ${color.text} ${color.border}`}
                         >
                           <span>
-                            {evt.start_time} – {evt.end_time}{" "}
+                            {evt.always ? "Always on-call" : `${evt.start_time} – ${evt.end_time}`}{" "}
                             <span className="text-xs opacity-70">
                               ({isOwn ? "You" : maskPhone(evt.phone_number)}){evt.recurring && " · recurring"}
+                              {evt.always && " · always"}
                             </span>
                           </span>
                           {isOwn && (
                             <button
                               onClick={() => handleDeleteSchedule(evt._id)}
-                              className="text-red-600 hover:text-red-800 text-xs font-medium ml-2"
+                              className="text-neutral-100 hover:text-neutral-200 text-xs font-medium ml-2"
                             >
                               Delete
                             </button>
@@ -403,7 +449,7 @@ export const SchedulePage = () => {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded text-sm text-gray-600 hover:bg-gray-100"
+                    className="px-4 py-2 rounded text-sm text-neutral-200 hover:bg-neutral-200"
                   >
                     Cancel
                   </button>
