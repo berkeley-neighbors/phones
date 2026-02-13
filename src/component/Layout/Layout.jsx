@@ -17,6 +17,7 @@ import { useSnackbar } from "@/context/SnackbarContext";
 
 const FOOTER_TEXT = import.meta.env.VITE_FOOTER_TEXT || "";
 const DRAWER_TEXT = import.meta.env.VITE_DRAWER_TEXT || "";
+const HEADER_SUBTITLE_TEXT = import.meta.env.VITE_HEADER_SUBTITLE_TEXT || "";
 const DrawerItem = ({ icon: Icon, label, onClick }) => (
   <div onClick={onClick} className="flex items-center gap-4 px-6 py-4 hover:bg-violet-700 cursor-pointer text-white">
     <Icon className="text-xl" />
@@ -82,6 +83,7 @@ export const Layout = ({ children, title }) => {
             onClick={() => setIsDrawerOpen(true)}
           />
           {title && <h3 className="text-white text-lg font-semibold m-0">{title}</h3>}
+          {HEADER_SUBTITLE_TEXT && <span className="text-violet-300 text-sm ml-auto">{HEADER_SUBTITLE_TEXT}</span>}
         </div>
       </div>
       <div className="grow flex justify-center">

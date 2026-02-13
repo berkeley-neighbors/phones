@@ -95,8 +95,8 @@
 
 .phonebook-modal-input:focus {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: #287C97;
+  box-shadow: 0 0 0 3px rgba(40, 124, 151, 0.1);
 }
 
 .phonebook-modal-help-text {
@@ -146,12 +146,12 @@
 }
 
 .phonebook-modal-button-primary {
-  background-color: #7c3aed;
+  background-color: #287C97;
   color: white;
 }
 
 .phonebook-modal-button-primary:hover:not(:disabled) {
-  background-color: #6d28d9;
+  background-color: #1F6076;
 }
 
 .phonebook-modal-button-secondary {

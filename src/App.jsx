@@ -20,6 +20,8 @@ import { SchedulePage } from "./component/SchedulePage/SchedulePage";
 import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage";
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage";
 
+const LOADING_TEXT = import.meta.env.VITE_LOADING_TEXT || "";
+
 export const App = () => {
   const [loading, setLoading] = useState(true);
   const [isForbidden, setIsForbidden] = useState(false);
@@ -43,10 +45,10 @@ export const App = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-200">
+      <div className="min-h-screen flex items-center justify-center bg-gray-200 -mt-32">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-violet-900 mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          {LOADING_TEXT && <p className="text-gray-500 text-2xl mb-6">{LOADING_TEXT}</p>}
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-violet-900 mb-6"></div>
         </div>
       </div>
     );
