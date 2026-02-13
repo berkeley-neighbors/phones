@@ -8,6 +8,7 @@ import { MessageAnnotationClient } from "../clients/message-annotation.js";
 const TWILIO_ACCOUNT_SID = getEnvironmentVariable("TWILIO_ACCOUNT_SID");
 const TWILIO_API_TOKEN = getEnvironmentVariable("TWILIO_API_TOKEN");
 const TWILIO_API_SECRET = getEnvironmentVariable("TWILIO_API_SECRET");
+const TWILIO_AUTH_TOKEN = getEnvironmentVariable("TWILIO_AUTH_TOKEN");
 
 export function Router(db) {
   const router = express.Router();
@@ -25,6 +26,10 @@ export function Router(db) {
 
   const getAuthorizationHeader = () => {
     return `Basic ${Buffer.from(`${TWILIO_API_TOKEN}:${TWILIO_API_SECRET}`).toString("base64")}`;
+  };
+
+  const getAccountAuthorizationHeader = () => {
+    return `Basic ${Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64")}`;
   };
 
   router.get("/", auth, async (req, res) => {
@@ -199,7 +204,7 @@ export function Router(db) {
       const url = getMessageMediaUrl(messageSid);
       const response = await fetch(url, {
         headers: {
-          Authorization: getAuthorizationHeader(),
+          Authorization: getAccountAuthorizationHeader(),
         },
       });
 
