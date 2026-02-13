@@ -16,6 +16,7 @@ import { CallDetailsPage } from "./component/CallDetailsPage/CallDetailsPage";
 import { PhoneBookPage } from "./component/PhoneBookPage/PhoneBookPage";
 import { RunbookPage } from "./component/RunbookPage/RunbookPage";
 import { ConfigPage } from "./component/ConfigPage/ConfigPage";
+import { SchedulePage } from "./component/SchedulePage/SchedulePage";
 import { ForbiddenErrorPage } from "./component/ForbiddenErrorPage/ForbiddenErrorPage";
 import { AuthCallbackPage } from "./component/AuthCallbackPage/AuthCallbackPage";
 
@@ -75,6 +76,7 @@ export const App = () => {
                 <Route path="/call/:callSid" element={<CallDetailsPage />} />
                 <Route path="/phonebook" element={<PhoneBookPage />} />
                 <Route path="/runbook" element={<RunbookPage />} />
+                <Route path="/schedule" element={<SchedulePage />} />
                 <Route path="/config" element={<ConfigPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>

@@ -1,8 +1,11 @@
+import { randomUUID } from "node:crypto";
 import express from "express";
 import { ObjectId } from "mongodb";
 import { collection, auth } from "../middleware.js";
+import { ScheduleClient } from "../clients/schedule.js";
 
-export function Router() {
+export function Router(db) {
+  const scheduleClient = new ScheduleClient(db);
   const router = express.Router();
 
   router.use(auth);
@@ -44,6 +47,7 @@ export function Router() {
 
       const newStaff = {
         _id: new ObjectId(),
+        id: randomUUID(),
         phone_number,
         active: true,
       };
@@ -57,28 +61,28 @@ export function Router() {
   });
 
   // Just used for toggling active state today
-  router.put("/:phone_number", async (req, res) => {
+  router.put("/:id", async (req, res) => {
     try {
-      const { phone_number } = req.params;
+      const { id } = req.params;
       const { active } = req.body;
 
-      if (!phone_number) {
-        return res.status(400).json({ error: "Phone number is required" });
+      if (!id) {
+        return res.status(400).json({ error: "Staff ID is required" });
       }
 
       if (typeof active !== "boolean") {
         return res.status(400).json({ error: "Active must be a boolean value" });
       }
 
-      const result = await collection.read(req).updateOne({ phone_number }, { $set: { active } });
+      const result = await collection.read(req).updateOne({ id }, { $set: { active } });
 
       if (result.matchedCount === 0) {
-        return res.status(404).json({ error: "Phone number not found" });
+        return res.status(404).json({ error: "Staff member not found" });
       }
 
       res.status(200).json({
         message: "Staff member updated successfully",
-        phone_number,
+        id,
         active,
       });
     } catch (error) {
@@ -87,23 +91,26 @@ export function Router() {
     }
   });
 
-  router.delete("/:phone_number", async (req, res) => {
+  router.delete("/:id", async (req, res) => {
     try {
-      const { phone_number } = req.params;
+      const { id } = req.params;
 
-      if (!phone_number) {
-        return res.status(400).json({ error: "Phone number is required" });
+      if (!id) {
+        return res.status(400).json({ error: "Staff ID is required" });
       }
 
-      const result = await collection.read(req).deleteOne({ phone_number });
+      const staff = await collection.read(req).findOne({ id });
 
-      if (result.deletedCount === 0) {
-        return res.status(404).json({ error: "Phone number not found" });
+      if (!staff) {
+        return res.status(404).json({ error: "Staff member not found" });
       }
+
+      await collection.read(req).deleteOne({ id });
+      await scheduleClient.deleteByPhoneNumber(staff.phone_number);
 
       res.status(200).json({
         message: "Staff member removed successfully",
-        phone_number,
+        id,
       });
     } catch (error) {
       console.error("Error removing staff:", error);

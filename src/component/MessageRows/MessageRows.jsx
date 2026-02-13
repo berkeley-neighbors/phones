@@ -150,6 +150,15 @@ export const MessageRows = ({ loading = true, messages = [] }) => {
       </div>
     );
 
+  if (messages.length === 0)
+    return (
+      <div className="text-center mt-16">
+        <InboxOutlined className="text-6xl text-gray-300" />
+        <p className="mt-4 text-gray-500 text-lg">No messages yet</p>
+        <p className="mt-1 text-gray-400 text-sm">Messages will appear here when they arrive</p>
+      </div>
+    );
+
   // Group messages by the other party (for received messages: from, for sent messages: to)
   const groupedMessages = messages.reduce((groups, message) => {
     const key = message.direction === MessageDirection.received ? message.from : message.to;

@@ -1,5 +1,12 @@
 import { URL } from "url";
-import { StaffRouter, PhonebookRouter, MessageRouter, ConfigRouter, CallsRouter } from "./routers/index.js";
+import {
+  StaffRouter,
+  PhonebookRouter,
+  MessageRouter,
+  ConfigRouter,
+  CallsRouter,
+  ScheduleRouter,
+} from "./routers/index.js";
 import { auth } from "./middleware.js";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
 import express from "express";
@@ -53,10 +60,11 @@ export function setRoutes(app, basePath, db) {
   });
 
   baseRouter.use("/messages", MessageRouter(db));
-  baseRouter.use("/staff", StaffRouter());
+  baseRouter.use("/staff", StaffRouter(db));
   baseRouter.use("/phonebook", PhonebookRouter());
   baseRouter.use("/config", ConfigRouter(db));
   baseRouter.use("/calls", CallsRouter(db));
+  baseRouter.use("/schedules", ScheduleRouter(db));
   baseRouter.use("/session-token", auth);
 
   async function getSynologySessionToken(req, res) {

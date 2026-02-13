@@ -8,6 +8,7 @@ import {
   MenuOutlined,
   CloseOutlined,
   FileTextOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -53,6 +54,7 @@ const NavigationDrawer = ({ isOpen, onClose }) => {
           <DrawerItem icon={TeamOutlined} label="Staff" onClick={() => handleNavigation("/staff")} />
           <DrawerItem icon={BookOutlined} label="Directory" onClick={() => handleNavigation("/phonebook")} />
           <DrawerItem icon={FileTextOutlined} label="Runbook" onClick={() => handleNavigation("/runbook")} />
+          <DrawerItem icon={CalendarOutlined} label="Schedule" onClick={() => handleNavigation("/schedule")} />
           <DrawerItem icon={SettingOutlined} label="Config" onClick={() => handleNavigation("/config")} />
         </nav>
       </div>
