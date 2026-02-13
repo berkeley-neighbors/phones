@@ -110,7 +110,7 @@ export const SchedulePage = () => {
       const { data } = await api.get("/api/schedules");
       setSchedules(data || []);
     } catch (error) {
-      addNotification(`Error loading schedules: ${error.message}`, "error");
+      addNotification(`Error loading schedules: ${error.message}`, "error", "schedule");
     } finally {
       setLoading(false);
     }
@@ -126,9 +126,9 @@ export const SchedulePage = () => {
       });
       setProfile(data);
       setPhoneInput("");
-      addNotification("Phone number linked successfully!", "success");
+      addNotification("Phone number linked successfully!", "success", "phone-link");
     } catch (error) {
-      addNotification(error.response?.data?.error || error.message, "error");
+      addNotification(error.response?.data?.error || error.message, "error", "phone-link");
     } finally {
       setSettingProfile(false);
     }
@@ -139,15 +139,15 @@ export const SchedulePage = () => {
       await api.delete("/api/schedules/profile");
       setProfile({ uid: profile.uid, phone_number: null });
       setSchedules(schedules.filter(s => s.uid !== profile.uid));
-      addNotification("Phone number unlinked", "success");
+      addNotification("Phone number unlinked", "success", "phone-link");
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "phone-link");
     }
   };
 
   const handleDayClick = date => {
     if (!profile?.phone_number) {
-      addNotification("Please link your phone number first", "error");
+      addNotification("Please link your phone number first", "error", "phone-link");
       return;
     }
     if (date.format("YYYY-MM-DD") < today) {
@@ -164,7 +164,7 @@ export const SchedulePage = () => {
     e.preventDefault();
 
     if (startTime >= endTime) {
-      addNotification("End time must be after start time", "error");
+      addNotification("End time must be after start time", "error", "schedule");
       return;
     }
 
@@ -176,11 +176,11 @@ export const SchedulePage = () => {
         end_time: endTime,
         recurring,
       });
-      addNotification("Schedule created!", "success");
+      addNotification("Schedule created!", "success", "schedule");
       setShowModal(false);
       await loadSchedules();
     } catch (error) {
-      addNotification(error.response?.data?.error || error.message, "error");
+      addNotification(error.response?.data?.error || error.message, "error", "schedule");
     }
   };
 
@@ -189,11 +189,11 @@ export const SchedulePage = () => {
 
     try {
       await api.delete(`/api/schedules/${id}`);
-      addNotification("Schedule deleted", "success");
+      addNotification("Schedule deleted", "success", "schedule");
       setShowModal(false);
       await loadSchedules();
     } catch (error) {
-      addNotification(error.response?.data?.error || error.message, "error");
+      addNotification(error.response?.data?.error || error.message, "error", "schedule");
     }
   };
 
@@ -245,10 +245,10 @@ export const SchedulePage = () => {
                   if (entry && window.confirm("Remove always on-call status?")) {
                     try {
                       await api.delete(`/api/schedules/${entry._id}`);
-                      addNotification("Always on-call removed", "success");
+                      addNotification("Always on-call removed", "success", "on-call");
                       await loadSchedules();
                     } catch (error) {
-                      addNotification(error.response?.data?.error || error.message, "error");
+                      addNotification(error.response?.data?.error || error.message, "error", "on-call");
                     }
                   }
                 }}
@@ -261,10 +261,10 @@ export const SchedulePage = () => {
                 onClick={async () => {
                   try {
                     await api.post("/api/schedules", { always: true });
-                    addNotification("Marked as always on-call", "success");
+                    addNotification("Marked as always on-call", "success", "on-call");
                     await loadSchedules();
                   } catch (error) {
-                    addNotification(error.response?.data?.error || error.message, "error");
+                    addNotification(error.response?.data?.error || error.message, "error", "on-call");
                   }
                 }}
                 className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"

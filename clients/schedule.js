@@ -73,6 +73,33 @@ export class ScheduleClient {
       }
     }
 
+    const isRecurring = !isAlways && (data.recurring || false);
+
+    if (!isAlways) {
+      const duplicateFilter = isRecurring
+        ? {
+            uid,
+            recurring: true,
+            day_of_week: data.day_of_week,
+            start_time: data.start_time,
+            end_time: data.end_time,
+          }
+        : {
+            uid,
+            recurring: false,
+            always: { $ne: true },
+            date: data.date,
+            start_time: data.start_time,
+            end_time: data.end_time,
+          };
+
+      const existing = await this.scheduleCollection.findOne(duplicateFilter);
+
+      if (existing) {
+        throw new Error("This schedule block already exists");
+      }
+    }
+
     const schedule = {
       _id: new ObjectId(),
       uid,
@@ -80,7 +107,7 @@ export class ScheduleClient {
       start_time: isAlways ? "00:00" : data.start_time,
       end_time: isAlways ? "23:59" : data.end_time,
       day_of_week: data.day_of_week ?? null,
-      recurring: false,
+      recurring: isRecurring,
       always: isAlways,
       date: data.date || new Date().toISOString().split("T")[0],
       created_at: new Date(),

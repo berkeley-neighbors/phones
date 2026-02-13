@@ -24,7 +24,7 @@ export const StaffPage = () => {
 
       setStaffMembers(data || []);
     } catch (error) {
-      addNotification(`Error loading staff: ${error.message}`, "error");
+      addNotification(`Error loading staff: ${error.message}`, "error", "staff");
     } finally {
       setLoading(false);
     }
@@ -39,11 +39,11 @@ export const StaffPage = () => {
         phone_number: phoneNumber,
       });
 
-      addNotification("Staff member added successfully!", "success");
+      addNotification("Staff member added successfully!", "success", "staff");
       setPhoneNumber("");
       await loadStaffMembers();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "staff");
     } finally {
       setSubmitting(false);
     }
@@ -57,10 +57,10 @@ export const StaffPage = () => {
     try {
       await api.delete(`/api/staff/${encodeURIComponent(member.id)}`);
 
-      addNotification(`${member.phone_number} successfully removed!`, "success");
+      addNotification(`${member.phone_number} successfully removed!`, "success", "staff");
       await loadStaffMembers();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "staff");
     }
   };
 
@@ -70,10 +70,10 @@ export const StaffPage = () => {
         active: !member.active,
       });
 
-      addNotification(`${member.phone_number} ${!member.active ? "activated" : "deactivated"}`, "success");
+      addNotification(`${member.phone_number} ${!member.active ? "activated" : "deactivated"}`, "success", "staff");
       await loadStaffMembers();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "staff");
     }
   };
 
