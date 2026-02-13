@@ -60,29 +60,25 @@ const CallRow = ({ call, onClick }) => {
         <span className="font-semibold text-gray-800 truncate">{isInbound ? call.from : call.to}</span>
         <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{fromNow(call.date_created)}</span>
       </div>
-      <div className={`flex ${isInbound ? "justify-start" : "justify-end"}`}>
-        <div className={`max-w-[85%] min-w-0 ${isInbound ? "" : "flex flex-col items-end"}`}>
-          <div
-            className={`px-4 py-3 rounded-lg overflow-hidden ${
-              isInbound
-                ? hasAnswer
-                  ? "bg-white border border-gray-300 shadow-sm"
-                  : "bg-gray-100 border border-gray-300"
-                : hasAnswer
-                  ? "bg-violet-600 text-white shadow-sm"
-                  : "bg-violet-400 text-white opacity-90"
-            } hover:shadow-lg transition-shadow`}
-            style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-          >
-            <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
-              {isInbound ? <PhoneOutlined className="text-sm" /> : <PhoneFilled className="text-sm" />}
-              <span className="font-semibold">{isInbound ? "Incoming" : "Outgoing"} Call</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`font-medium ${getStatusColor(call.status)}`}>{call.status}</span>
-              <span className="text-sm">Duration: {formatDuration(call.duration)}</span>
-            </div>
-          </div>
+      <div
+        className={`px-4 py-3 rounded-lg overflow-hidden ${
+          isInbound
+            ? hasAnswer
+              ? "bg-white border border-gray-300 shadow-sm"
+              : "bg-gray-100 border border-gray-300"
+            : hasAnswer
+              ? "bg-violet-600 text-white shadow-sm"
+              : "bg-violet-400 text-white opacity-90"
+        } hover:shadow-lg transition-shadow`}
+        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+      >
+        <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
+          {isInbound ? <PhoneOutlined className="text-sm" /> : <PhoneFilled className="text-sm" />}
+          <span className="font-semibold">{isInbound ? "Incoming" : "Outgoing"} Call</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={`font-medium ${getStatusColor(call.status)}`}>{call.status}</span>
+          <span className="text-sm">Duration: {formatDuration(call.duration)}</span>
         </div>
       </div>
     </div>

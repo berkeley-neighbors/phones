@@ -45,9 +45,11 @@ export const App = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-200 -mt-32">
-        <div className="text-center">
-          {LOADING_TEXT && <p className="text-gray-500 text-2xl mb-6">{LOADING_TEXT}</p>}
+      <div className="h-screen flex items-center justify-center bg-gray-200">
+        <div className="text-center pb-32">
+          {LOADING_TEXT && (
+            <p className="text-violet-900/60 text-2xl mb-6 font-light italic tracking-wide">{LOADING_TEXT}</p>
+          )}
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-violet-900 mb-6"></div>
         </div>
       </div>

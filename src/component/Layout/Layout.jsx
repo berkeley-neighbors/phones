@@ -83,7 +83,9 @@ export const Layout = ({ children, title }) => {
             onClick={() => setIsDrawerOpen(true)}
           />
           {title && <h3 className="text-white text-lg font-semibold m-0">{title}</h3>}
-          {HEADER_SUBTITLE_TEXT && <span className="text-violet-300 text-sm ml-auto">{HEADER_SUBTITLE_TEXT}</span>}
+          {HEADER_SUBTITLE_TEXT && (
+            <span className="text-white text-sm ml-auto font-light tracking-wider">{HEADER_SUBTITLE_TEXT}</span>
+          )}
         </div>
       </div>
       <div className="grow flex justify-center">
