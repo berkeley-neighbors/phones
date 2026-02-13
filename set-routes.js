@@ -6,6 +6,7 @@ import {
   ConfigRouter,
   CallsRouter,
   ScheduleRouter,
+  ConversationNotesRouter,
 } from "./routers/index.js";
 import { auth } from "./middleware.js";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
@@ -65,6 +66,7 @@ export function setRoutes(app, basePath, db) {
   baseRouter.use("/config", ConfigRouter(db));
   baseRouter.use("/calls", CallsRouter(db));
   baseRouter.use("/schedules", ScheduleRouter(db));
+  baseRouter.use("/conversation-notes", ConversationNotesRouter(db));
   baseRouter.use("/session-token", auth);
 
   async function getSynologySessionToken(req, res) {

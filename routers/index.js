@@ -7,3 +7,4 @@ export { Router as MessageRouter } from "./message.js";
 export { Router as ConfigRouter } from "./config.js";
 export { Router as CallsRouter } from "./calls.js";
 export { Router as ScheduleRouter } from "./schedule.js";
+export { Router as ConversationNotesRouter } from "./conversation-notes.js";

@@ -1,4 +1,10 @@
-import { InboxOutlined, SendOutlined } from "@ant-design/icons";
+import {
+  InboxOutlined,
+  SendOutlined,
+  FileTextOutlined,
+  CheckCircleOutlined,
+  CheckCircleFilled,
+} from "@ant-design/icons";
 import { fromNow } from "../../js/util";
 import { isEmpty } from "lodash";
 import { MessageDirection } from "../../js/types";
@@ -89,9 +95,19 @@ const MessageRow = (message, onClick) => {
 /**
  * Conversation card showing a phone number and message count
  */
-const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick }) => {
+const ConversationCard = ({
+  phoneNumber,
+  messageCount,
+  latestMessage,
+  onClick,
+  conversationNote,
+  onNotesClick,
+  onDoneToggle,
+}) => {
   const isReceived = latestMessage.direction === MessageDirection.received;
   const isSender = latestMessage.annotation;
+  const isDone = conversationNote?.done ?? false;
+  const hasNotes = conversationNote?.notes?.length > 0;
 
   let wrappingClasses = "bg-violet-500 text-white opacity-90";
 
@@ -108,27 +124,54 @@ const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick })
   }
 
   return (
-    <div key={phoneNumber} onClick={onClick} className="mb-4 cursor-pointer">
+    <div key={phoneNumber} className={`mb-4 ${isDone ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between mb-2 px-2">
-        <span className="font-semibold text-gray-800 truncate">{phoneNumber}</span>
+        <span
+          className={`font-semibold truncate ${isDone ? "text-gray-400 line-through" : "text-gray-800"}`}
+          onClick={onClick}
+          role="button"
+        >
+          {phoneNumber}
+        </span>
         <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{fromNow(latestMessage.date)}</span>
       </div>
-      <div className={`flex ${isReceived ? "justify-start" : "justify-end"}`}>
-        <div className={`max-w-[85%] min-w-0 ${isReceived ? "" : "flex flex-col items-end"}`}>
-          <div
-            className={`px-4 py-3 rounded-lg break-words overflow-hidden ${wrappingClasses} hover:shadow-lg transition-shadow`}
-            style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-          >
+      <div className="cursor-pointer" onClick={onClick}>
+        <div
+          className={`flex items-center px-4 py-3 rounded-lg overflow-hidden ${wrappingClasses} hover:shadow-lg transition-shadow`}
+        >
+          <div className="flex-1 min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
             <div className="flex items-center gap-2 mb-2 text-xs opacity-75">
               {isReceived ? <InboxOutlined className="text-sm" /> : <SendOutlined className="text-sm" />}
               <span>
                 {messageCount} {messageCount === 1 ? "message" : "messages"}
               </span>
             </div>
-            <div className={`line-clamp-2`} style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+            <div className="line-clamp-2" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
               {messageBody(latestMessage)}
             </div>
             {latestMessage.media > 0 && <div className="mt-2 text-xs opacity-75">📎 Has attachments</div>}
+          </div>
+          <div className="flex items-center gap-4 flex-shrink-0 ml-4">
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                onNotesClick(phoneNumber);
+              }}
+              className={`bg-transparent border-none p-2 cursor-pointer text-gray-800 hover:text-black hover:bg-transparent transition-colors ${hasNotes ? "text-amber-700" : ""}`}
+              title={hasNotes ? "Edit notes" : "Add notes"}
+            >
+              <FileTextOutlined className="text-xl" />
+            </button>
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                onDoneToggle(phoneNumber);
+              }}
+              className={`bg-transparent border-none p-2 cursor-pointer text-gray-800 hover:text-black hover:bg-transparent transition-colors ${isDone ? "text-green-700" : ""}`}
+              title={isDone ? "Mark as not done" : "Mark as done"}
+            >
+              {isDone ? <CheckCircleFilled className="text-xl" /> : <CheckCircleOutlined className="text-xl" />}
+            </button>
           </div>
         </div>
       </div>
@@ -136,7 +179,7 @@ const ConversationCard = ({ phoneNumber, messageCount, latestMessage, onClick })
   );
 };
 
-export const MessageRows = ({ loading = true, messages = [] }) => {
+export const MessageRows = ({ loading = true, messages = [], conversationNotes = {}, onNotesClick, onDoneToggle }) => {
   const navigate = useNavigate();
 
   const handleConversationClick = phoneNumber => {
@@ -185,6 +228,9 @@ export const MessageRows = ({ loading = true, messages = [] }) => {
           messageCount={groupMessages.length}
           latestMessage={groupMessages[0]}
           onClick={() => handleConversationClick(phoneNumber)}
+          conversationNote={conversationNotes[phoneNumber]}
+          onNotesClick={onNotesClick}
+          onDoneToggle={onDoneToggle}
         />
       ))}
     </div>
