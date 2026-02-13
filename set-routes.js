@@ -8,6 +8,20 @@ const ssoUrl = getEnvironmentVariable("SYNOLOGY_SSO_URL");
 const SYNOLOGY_ALLOWED_GROUP = getEnvironmentVariable("SYNOLOGY_ALLOWED_GROUP", "");
 const AUTH_METHOD = getEnvironmentVariable("AUTH_METHOD");
 
+if (AUTH_METHOD === "synology") {
+  const requiredVars = ["SYNOLOGY_API_USERNAME", "SYNOLOGY_API_PASSWORD"];
+  const missing = requiredVars.filter(v => !process.env[v]);
+  if (missing.length > 0) {
+    console.error(
+      `Fatal: AUTH_METHOD is "synology" but the following required environment variables are not set: ${missing.join(", ")}`,
+    );
+    process.exit(1);
+  }
+}
+
+const SYNOLOGY_API_USERNAME = getEnvironmentVariable("SYNOLOGY_API_USERNAME", "");
+const SYNOLOGY_API_PASSWORD = getEnvironmentVariable("SYNOLOGY_API_PASSWORD", "");
+
 export function setRoutes(app, basePath, db) {
   const baseRouter = express.Router();
 
@@ -83,16 +97,50 @@ export function setRoutes(app, basePath, db) {
         return res.status(500).json({ error: "Failed to authenticate with Synology" });
       }
 
-      const { synotoken, sid, account } = parsed.data;
+      const { synotoken, account } = parsed.data;
 
       if (SYNOLOGY_ALLOWED_GROUP) {
+        // Authenticate with the dedicated admin account for group queries
+        const adminAuthUrl = new URL("/webapi/entry.cgi?api=SYNO.API.Auth", ssoUrl);
+        adminAuthUrl.searchParams.append("version", "7");
+        adminAuthUrl.searchParams.append("method", "login");
+
+        console.log("Authenticating admin account for group membership check");
+
+        const adminAuthResponse = await fetch(adminAuthUrl.toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            api: "SYNO.API.Auth",
+            account: SYNOLOGY_API_USERNAME,
+            passwd: SYNOLOGY_API_PASSWORD,
+            enable_syno_token: "yes",
+            version: "7",
+            method: "login",
+          }),
+        });
+
+        if (!adminAuthResponse.ok) {
+          throw new Error(`Failed to authenticate admin account: ${adminAuthResponse.statusText}`);
+        }
+
+        const adminAuth = await adminAuthResponse.json();
+
+        if (!adminAuth.success) {
+          console.error("Admin authentication error:", adminAuth.error);
+          return res.status(500).json({ error: "Failed to authenticate admin account for group check" });
+        }
+
+        const adminSynoToken = adminAuth.data.synotoken;
+        const adminSid = adminAuth.data.sid;
+
         const groupCheckUrl = new URL("/webapi/entry.cgi", ssoUrl);
         groupCheckUrl.searchParams.append("api", "SYNO.Core.Group.Member");
         groupCheckUrl.searchParams.append("version", "1");
         groupCheckUrl.searchParams.append("method", "list");
         groupCheckUrl.searchParams.append("group", SYNOLOGY_ALLOWED_GROUP);
-        groupCheckUrl.searchParams.append("SynoToken", synotoken);
-        groupCheckUrl.searchParams.append("_sid", sid);
+        groupCheckUrl.searchParams.append("SynoToken", adminSynoToken);
+        groupCheckUrl.searchParams.append("_sid", adminSid);
 
         console.debug("Checking group membership for:", SYNOLOGY_ALLOWED_GROUP);
         const groupResponse = await fetch(groupCheckUrl.toString(), {
