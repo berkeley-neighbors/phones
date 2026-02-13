@@ -24,6 +24,10 @@ export function Router(db) {
     return `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages/${messageSid}/Media.json`;
   };
 
+  const getMessageMediaBySidUrl = (messageSid, mediaSid) => {
+    return `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages/${messageSid}/Media/${mediaSid}`;
+  };
+
   const getAuthorizationHeader = () => {
     return `Basic ${Buffer.from(`${TWILIO_API_TOKEN}:${TWILIO_API_SECRET}`).toString("base64")}`;
   };
@@ -211,6 +215,37 @@ export function Router(db) {
       res.status(200).json(await response.json());
     } catch (error) {
       console.error("Error fetching media:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+
+  router.get("/:messageSid/media/:mediaSid", auth, async (req, res) => {
+    const { messageSid, mediaSid } = req.params;
+    if (!messageSid || !mediaSid) {
+      return res.status(400).send("Bad Request: Missing message SID or media SID");
+    }
+
+    try {
+      const url = getMessageMediaBySidUrl(messageSid, mediaSid);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: getAccountAuthorizationHeader(),
+        },
+      });
+
+      if (!response.ok) {
+        return res.status(response.status).send(response.statusText);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType) {
+        res.setHeader("Content-Type", contentType);
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      res.status(200).send(buffer);
+    } catch (error) {
+      console.error("Error fetching media by SID:", error);
       res.status(500).send("Internal Server Error");
     }
   });
