@@ -11,6 +11,7 @@ import { SendPage } from "./component/SendPage/SendPage";
 import { MessagePage } from "./component/MessagePage/MessagePage";
 import { SentPage } from "./component/SentPage/SentPage";
 import { StaffPage } from "./component/StaffPage/StaffPage";
+import { BlockedPage } from "./component/BlockedPage/BlockedPage";
 import { CallsPage } from "./component/CallsPage/CallsPage";
 import { CallDetailsPage } from "./component/CallDetailsPage/CallDetailsPage";
 import { PhoneBookPage } from "./component/PhoneBookPage/PhoneBookPage";
@@ -71,6 +72,7 @@ export const App = () => {
                 <Route path="/send" element={<SendPage />} />
                 <Route path="/send/:number" element={<SendPage />} />
                 <Route path="/staff" element={<StaffPage />} />
+                <Route path="/blocked" element={<BlockedPage />} />
                 <Route path="/calls" element={<CallsPage />} />
                 <Route path="/call/:callSid" element={<CallDetailsPage />} />
                 <Route path="/phonebook" element={<PhoneBookPage />} />

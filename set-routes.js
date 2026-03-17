@@ -1,5 +1,5 @@
 import { URL } from "url";
-import { StaffRouter, PhonebookRouter, MessageRouter, ConfigRouter, CallsRouter } from "./routers/index.js";
+import { StaffRouter, BlockedRouter, PhonebookRouter, MessageRouter, ConfigRouter, CallsRouter } from "./routers/index.js";
 import { auth } from "./middleware.js";
 import { getEnvironmentVariable } from "./get-environment-variable.js";
 import express from "express";
@@ -40,6 +40,7 @@ export function setRoutes(app, basePath, db) {
 
   baseRouter.use("/messages", MessageRouter(db));
   baseRouter.use("/staff", StaffRouter());
+  baseRouter.use("/blocked", BlockedRouter());
   baseRouter.use("/phonebook", PhonebookRouter());
   baseRouter.use("/config", ConfigRouter(db));
   baseRouter.use("/calls", CallsRouter(db));
