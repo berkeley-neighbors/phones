@@ -9,6 +9,7 @@ import {
   MenuOutlined,
   CloseOutlined,
   FileTextOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ import { useSnackbar } from "@/context/SnackbarContext";
 
 const FOOTER_TEXT = import.meta.env.VITE_FOOTER_TEXT || "";
 const DRAWER_TEXT = import.meta.env.VITE_DRAWER_TEXT || "";
+const HEADER_SUBTITLE_TEXT = import.meta.env.VITE_HEADER_SUBTITLE_TEXT || "";
 const DrawerItem = ({ icon: Icon, label, onClick }) => (
   <div onClick={onClick} className="flex items-center gap-4 px-6 py-4 hover:bg-violet-700 cursor-pointer text-white">
     <Icon className="text-xl" />
@@ -55,6 +57,7 @@ const NavigationDrawer = ({ isOpen, onClose }) => {
           <DrawerItem icon={EyeInvisibleOutlined} label="Blocked" onClick={() => handleNavigation("/blocked")} />
           <DrawerItem icon={BookOutlined} label="Directory" onClick={() => handleNavigation("/phonebook")} />
           <DrawerItem icon={FileTextOutlined} label="Runbook" onClick={() => handleNavigation("/runbook")} />
+          <DrawerItem icon={CalendarOutlined} label="Schedule" onClick={() => handleNavigation("/schedule")} />
           <DrawerItem icon={SettingOutlined} label="Config" onClick={() => handleNavigation("/config")} />
         </nav>
       </div>
@@ -82,6 +85,9 @@ export const Layout = ({ children, title }) => {
             onClick={() => setIsDrawerOpen(true)}
           />
           {title && <h3 className="text-white text-lg font-semibold m-0">{title}</h3>}
+          {HEADER_SUBTITLE_TEXT && (
+            <span className="text-white text-sm ml-auto font-light tracking-wider">{HEADER_SUBTITLE_TEXT}</span>
+          )}
         </div>
       </div>
       <div className="grow flex justify-center">

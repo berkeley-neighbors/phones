@@ -26,7 +26,7 @@ export const ConfigPage = () => {
       setInboundNumber(data.inbound_number.value || "");
       setOutboundNumber(data.outbound_number.value || "");
     } catch (error) {
-      addNotification(`Error loading configuration: ${error.message}`, "error");
+      addNotification(`Error loading configuration: ${error.message}`, "error", "config");
     } finally {
       setLoading(false);
     }
@@ -48,9 +48,9 @@ export const ConfigPage = () => {
         }),
       });
 
-      addNotification("Configuration updated successfully!", "success");
+      addNotification("Configuration updated successfully!", "success", "config");
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "config");
     } finally {
       setSubmitting(false);
     }

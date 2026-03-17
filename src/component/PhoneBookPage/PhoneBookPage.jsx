@@ -26,7 +26,7 @@ export const PhoneBookPage = () => {
 
       setPhoneBookEntries(data || []);
     } catch (error) {
-      addNotification(`Error loading phone book: ${error.message}`, "error");
+      addNotification(`Error loading phone book: ${error.message}`, "error", "phonebook");
     } finally {
       setLoading(false);
     }
@@ -47,12 +47,16 @@ export const PhoneBookPage = () => {
         data: JSON.stringify(data),
       });
 
-      addNotification(editingEntry ? "Entry updated successfully!" : "Entry added successfully!", "success");
+      addNotification(
+        editingEntry ? "Entry updated successfully!" : "Entry added successfully!",
+        "success",
+        "phonebook",
+      );
       setIsModalOpen(false);
       setEditingEntry(null);
       await loadPhoneBookEntries();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "phonebook");
     } finally {
       setSubmitting(false);
     }
@@ -66,12 +70,12 @@ export const PhoneBookPage = () => {
     try {
       await api.delete(`/api/phonebook/${editingEntry._id}`);
 
-      addNotification("Entry successfully removed!", "success");
+      addNotification("Entry successfully removed!", "success", "phonebook");
       setIsModalOpen(false);
       setEditingEntry(null);
       await loadPhoneBookEntries();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "phonebook");
     } finally {
       setSubmitting(false);
     }

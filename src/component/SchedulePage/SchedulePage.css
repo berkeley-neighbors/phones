@@ -1,0 +1,11 @@
+.calendar-cell {
+  min-height: 80px;
+  padding: 4px 6px;
+}
+
+@media (max-width: 640px) {
+  .calendar-cell {
+    min-height: 60px;
+    padding: 2px 3px;
+  }
+}

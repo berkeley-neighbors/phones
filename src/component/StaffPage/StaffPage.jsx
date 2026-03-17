@@ -24,7 +24,7 @@ export const StaffPage = () => {
 
       setStaffMembers(data || []);
     } catch (error) {
-      addNotification(`Error loading staff: ${error.message}`, "error");
+      addNotification(`Error loading staff: ${error.message}`, "error", "staff");
     } finally {
       setLoading(false);
     }
@@ -39,41 +39,41 @@ export const StaffPage = () => {
         phone_number: phoneNumber,
       });
 
-      addNotification("Staff member added successfully!", "success");
+      addNotification("Staff member added successfully!", "success", "staff");
       setPhoneNumber("");
       await loadStaffMembers();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "staff");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const removeStaff = async phoneNumber => {
-    if (!window.confirm(`Are you sure you want to remove ${phoneNumber}?`)) {
+  const removeStaff = async member => {
+    if (!window.confirm(`Are you sure you want to remove ${member.phone_number}?`)) {
       return;
     }
 
     try {
-      await api.delete(`/api/staff/${encodeURIComponent(phoneNumber)}`);
+      await api.delete(`/api/staff/${encodeURIComponent(member.id)}`);
 
-      addNotification(`${phoneNumber} successfully removed!`, "success");
+      addNotification(`${member.phone_number} successfully removed!`, "success", "staff");
       await loadStaffMembers();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "staff");
     }
   };
 
-  const toggleActive = async (phoneNumber, currentActive) => {
+  const toggleActive = async member => {
     try {
-      await api.put(`/api/staff/${encodeURIComponent(phoneNumber)}`, {
-        active: !currentActive,
+      await api.put(`/api/staff/${encodeURIComponent(member.id)}`, {
+        active: !member.active,
       });
 
-      addNotification(`${phoneNumber} ${!currentActive ? "activated" : "deactivated"}`, "success");
+      addNotification(`${member.phone_number} ${!member.active ? "activated" : "deactivated"}`, "success", "staff");
       await loadStaffMembers();
     } catch (error) {
-      addNotification(error.message, "error");
+      addNotification(error.message, "error", "staff");
     }
   };
 
@@ -126,7 +126,7 @@ export const StaffPage = () => {
                   <td className="staff-table__cell">
                     <span
                       className={`staff-badge ${member.active ? "staff-badge--active" : "staff-badge--inactive"}`}
-                      onClick={() => toggleActive(member.phone_number, member.active)}
+                      onClick={() => toggleActive(member)}
                       style={{ cursor: "pointer" }}
                       title={`Click to ${member.active ? "deactivate" : "activate"}`}
                     >
@@ -134,7 +134,7 @@ export const StaffPage = () => {
                     </span>
                   </td>
                   <td className="staff-table__cell">
-                    <button className="staff-table__button" onClick={() => removeStaff(member.phone_number)}>
+                    <button className="staff-table__button" onClick={() => removeStaff(member)}>
                       Remove
                     </button>
                   </td>

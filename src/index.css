@@ -13,7 +13,7 @@ body {
     "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #fafafa;
+  background-color: #FAF7F2;
   height: 100%;
 }
 
@@ -30,19 +30,19 @@ code {
 }
 
 button {
-  background-color: #6d28d9;
-  border: #4c1d95 solid 2px;
+  background-color: #1F6076;
+  border: #081B25 solid 2px;
   border-radius: 6px;
   padding: 8px 16px 8px 16px;
   color: white;
 }
 
 button:hover {
-  background-color: #8b5cf6;
+  background-color: #3298B8;
 }
 
 button:active {
-  background-color: #4c1d95;
+  background-color: #081B25;
 }
 
 button:invalid {
@@ -124,7 +124,7 @@ label span {
 }
 a {
   font-weight: 500;
-  color: #2563eb;
+  color: #287C97;
 }
 a:hover {
   text-decoration: underline;

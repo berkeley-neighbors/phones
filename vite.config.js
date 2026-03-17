@@ -12,6 +12,8 @@ process.env.VITE_SYNOLOGY_SSO_URL = process.env.SYNOLOGY_SSO_URL;
 process.env.VITE_FOOTER_TEXT = process.env.FOOTER_TEXT;
 process.env.VITE_DRAWER_TEXT = process.env.DRAWER_TEXT;
 process.env.VITE_RUNBOOK_URL = process.env.RUNBOOK_URL;
+process.env.VITE_LOADING_TEXT = process.env.LOADING_TEXT;
+process.env.VITE_HEADER_SUBTITLE_TEXT = process.env.HEADER_SUBTITLE_TEXT;
 
 const PORT = getEnvironmentVariable("PORT", 3000);
 

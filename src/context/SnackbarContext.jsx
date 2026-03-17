@@ -20,13 +20,19 @@ export const SnackbarProvider = ({ children }) => {
     setNotifications([]);
   }, [location.pathname]);
 
-  const addNotification = (message, type = "info") => {
+  const addNotification = (message, type = "info", category) => {
     const notification = {
       id: Date.now() + Math.random(),
       message,
       type,
+      category,
     };
-    setNotifications(prev => [...prev, notification]);
+    setNotifications(prev => {
+      if (category) {
+        return [...prev.filter(n => n.category !== category), notification];
+      }
+      return [...prev, notification];
+    });
   };
 
   const dismissNotification = id => {

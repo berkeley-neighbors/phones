@@ -1,4 +1,4 @@
-.phonebook-modal-backdrop {
+.notes-modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   padding: 20px;
 }
 
-.phonebook-modal {
+.notes-modal {
   background: white;
   border-radius: 8px;
   max-width: 500px;
@@ -22,7 +22,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.phonebook-modal-header {
+.notes-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,14 +30,14 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.phonebook-modal-header h3 {
+.notes-modal-header h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
   color: #111827;
 }
 
-.phonebook-modal-close {
+.notes-modal-close {
   background: none;
   border: none;
   font-size: 28px;
@@ -54,79 +54,44 @@
   transition: background-color 0.2s;
 }
 
-.phonebook-modal-close:hover {
+.notes-modal-close:hover {
   background-color: #f3f4f6;
 }
 
-.phonebook-modal-close:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.phonebook-modal-body {
+.notes-modal-body {
   padding: 24px;
 }
 
-.phonebook-modal-form-group {
-  margin-bottom: 20px;
-}
-
-.phonebook-modal-form-group:last-child {
-  margin-bottom: 0;
-}
-
-.phonebook-modal-label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #374151;
-  font-size: 14px;
-}
-
-.phonebook-modal-input {
+.notes-modal-textarea {
   width: 100%;
+  min-height: 150px;
   padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 14px;
+  font-family: inherit;
   box-sizing: border-box;
+  resize: vertical;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.phonebook-modal-input:focus {
+.notes-modal-textarea:focus {
   outline: none;
   border-color: #287C97;
   box-shadow: 0 0 0 3px rgba(40, 124, 151, 0.1);
 }
 
-.phonebook-modal-help-text {
-  display: block;
-  color: #6b7280;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-.phonebook-modal-footer {
+.notes-modal-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   padding: 16px 24px;
   border-top: 1px solid #e5e7eb;
   background-color: #f9fafb;
   border-radius: 0 0 8px 8px;
 }
 
-.phonebook-modal-footer-left {
-  display: flex;
-  gap: 8px;
-}
-
-.phonebook-modal-footer-right {
-  display: flex;
-  gap: 8px;
-}
-
-.phonebook-modal-button {
+.notes-modal-button {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -136,38 +101,29 @@
   transition: background-color 0.2s, transform 0.1s;
 }
 
-.phonebook-modal-button:active {
+.notes-modal-button:active {
   transform: scale(0.98);
 }
 
-.phonebook-modal-button:disabled {
+.notes-modal-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.phonebook-modal-button-primary {
+.notes-modal-button-primary {
   background-color: #287C97;
   color: white;
 }
 
-.phonebook-modal-button-primary:hover:not(:disabled) {
+.notes-modal-button-primary:hover:not(:disabled) {
   background-color: #1F6076;
 }
 
-.phonebook-modal-button-secondary {
+.notes-modal-button-secondary {
   background-color: #e5e7eb;
   color: #374151;
 }
 
-.phonebook-modal-button-secondary:hover:not(:disabled) {
+.notes-modal-button-secondary:hover:not(:disabled) {
   background-color: #d1d5db;
-}
-
-.phonebook-modal-button-danger {
-  background-color: #dc2626;
-  color: white;
-}
-
-.phonebook-modal-button-danger:hover:not(:disabled) {
-  background-color: #b91c1c;
 }
