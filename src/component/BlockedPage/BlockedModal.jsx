@@ -82,7 +82,7 @@ export const BlockedModal = ({ isOpen, onClose, entry, onSave, onDelete, isSubmi
                 id="modal-blocked-by"
                 name="blocked_by"
                 className="blocked-modal-input"
-                defaultValue={entry?.description || ""}
+                defaultValue={entry?.blocked_by || ""}
                 placeholder="Your Name"
                 required
               />
@@ -97,7 +97,7 @@ export const BlockedModal = ({ isOpen, onClose, entry, onSave, onDelete, isSubmi
                 id="modal-reason"
                 name="reason"
                 className="blocked-modal-input"
-                defaultValue={entry?.name || ""}
+                defaultValue={entry?.reason || ""}
                 placeholder="Blocked Reason"
                 required
               />
