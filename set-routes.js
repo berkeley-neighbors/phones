@@ -1,5 +1,6 @@
 import { URL } from "url";
 import {
+  BlockedRouter,
   StaffRouter,
   PhonebookRouter,
   MessageRouter,
@@ -61,6 +62,7 @@ export function setRoutes(app, basePath, db) {
   });
 
   baseRouter.use("/messages", MessageRouter(db));
+  baseRouter.use("/blocked", BlockedRouter());
   baseRouter.use("/staff", StaffRouter(db));
   baseRouter.use("/phonebook", PhonebookRouter());
   baseRouter.use("/config", ConfigRouter(db));

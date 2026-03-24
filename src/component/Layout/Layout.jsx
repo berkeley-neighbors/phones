@@ -1,6 +1,7 @@
 import {
   InboxOutlined,
   SendOutlined,
+  EyeInvisibleOutlined,
   TeamOutlined,
   PhoneOutlined,
   BookOutlined,
@@ -53,6 +54,7 @@ const NavigationDrawer = ({ isOpen, onClose }) => {
           <DrawerItem icon={SendOutlined} label="Send" onClick={() => handleNavigation("/send")} />
           <DrawerItem icon={PhoneOutlined} label="Calls" onClick={() => handleNavigation("/calls")} />
           <DrawerItem icon={TeamOutlined} label="Staff" onClick={() => handleNavigation("/staff")} />
+          <DrawerItem icon={EyeInvisibleOutlined} label="Blocked" onClick={() => handleNavigation("/blocked")} />
           <DrawerItem icon={BookOutlined} label="Directory" onClick={() => handleNavigation("/phonebook")} />
           <DrawerItem icon={FileTextOutlined} label="Runbook" onClick={() => handleNavigation("/runbook")} />
           <DrawerItem icon={CalendarOutlined} label="Schedule" onClick={() => handleNavigation("/schedule")} />

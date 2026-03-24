@@ -1,0 +1,11 @@
+.blocked-table__row {
+  transition: background-color 0.2s ease;
+}
+
+.blocked-table__row:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.blocked-table__row:active {
+  background-color: #e5e7eb !important;
+}
